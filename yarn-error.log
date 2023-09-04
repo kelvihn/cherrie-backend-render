@@ -1,0 +1,68 @@
+Arguments: 
+  /usr/local/bin/node /usr/local/Cellar/yarn/1.22.18/libexec/bin/yarn.js run build
+
+PATH: 
+  /Users/obinnajeze/.rvm/gems/ruby-3.0.0/bin:/Users/obinnajeze/.rvm/gems/ruby-3.0.0@global/bin:/Users/obinnajeze/.rvm/rubies/ruby-3.0.0/bin:/Users/obinnajeze/.rbenv/shims:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Xamarin Workbooks.app/Contents/SharedSupport/path-bin:/Users/obinnajeze/.rvm/gems/ruby-3.0.0/bin:/Users/obinnajeze/.rvm/gems/ruby-3.0.0@global/bin:/Users/obinnajeze/.rvm/rubies/ruby-3.0.0/bin:/Users/obinnajeze/.rbenv/shims:/Users/obinnajeze/Library/Android/sdk/tools:/Users/obinnajeze/Library/Android/sdk/platform-tools:/Users/obinnajeze/WorkSpace/Flutter/flutter/bin:/Users/obinnajeze/.pub-cache/bin:/Users/obinnajeze/WorkSpace/Flutter/flutter/bin/dart:/Users/obinnajeze/.rvm/bin:/Users/obinnajeze/WorkSpace/Flutter/flutter/.pub-cache/binexport:/Users/obinnajeze/Library/Android/sdk/tools:/Users/obinnajeze/Library/Android/sdk/platform-tools:/Users/obinnajeze/WorkSpace/Flutter/flutter/bin:/Users/obinnajeze/.pub-cache/bin:/Users/obinnajeze/WorkSpace/Flutter/flutter/bin/dart:/Users/obinnajeze/WorkSpace/Flutter/flutter/.pub-cache/binexport
+
+Yarn version: 
+  1.22.18
+
+Node version: 
+  18.14.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/obinnajeze/Documents/GitHub/cherrie-backend-render/package.json: Unexpected token } in JSON at position 221
+      at JSON.parse (<anonymous>)
+      at /usr/local/Cellar/yarn/1.22.18/libexec/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.22.18/libexec/lib/cli.js:310:30)
+      at /usr/local/Cellar/yarn/1.22.18/libexec/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "tengo-clone-backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "nodemon index.js",
+      "build"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/xitij-dev/tengo-clone-backend.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/xitij-dev/tengo-clone-backend/issues"
+    },
+    "homepage": "https://github.com/xitij-dev/tengo-clone-backend#readme",
+    "dependencies": {
+      "agora-access-token": "^2.0.4",
+      "axios": "^1.2.3",
+      "bcryptjs": "^2.4.3",
+      "cors": "^2.8.5",
+      "dayjs": "^1.11.7",
+      "express": "^4.18.2",
+      "fcm-node": "^1.6.1",
+      "jsonwebtoken": "^9.0.0",
+      "moment": "^2.29.4",
+      "multer": "^1.4.5-lts.1",
+      "mongoose": "^6.8.4",
+      "nodemailer": "^6.9.1",
+      "nodemon": "^2.0.20",
+      "socket.io": "^4.5.4"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

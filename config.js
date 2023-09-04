@@ -12,7 +12,7 @@ module.exports = {
   //secret key for jwt
   JWT_SECRET: "JWT_SECRET",
 
-  baseURL: "https://www.your_website.com",
+  baseURL: "https://cherrie-backend-render-production.up.railway.app/",
 
   SERVER_KEY: "SERVER_KEY",
 };
