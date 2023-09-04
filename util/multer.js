@@ -8,6 +8,6 @@ module.exports = multer.diskStorage({
     callback(null, newFile);
   },
   destination: (req, file, callback) => {
-    callback(null, "/storage");
+    callback(null, "storage");
   },
 });
