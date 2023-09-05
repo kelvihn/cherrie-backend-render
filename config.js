@@ -14,5 +14,5 @@ module.exports = {
 
   baseURL: "https://cherrie-backend-render-production.up.railway.app/",
 
-  SERVER_KEY: "SERVER_KEY",
+  SERVER_KEY: "d98f862956bca86fcc61bd07b838baa807bbe295",
 };
