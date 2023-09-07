@@ -169,13 +169,13 @@ exports.getChatThumbList = async (req, res) => {
           topic: "$_id",
           message: "$chat.message",
           messageType: "$chat.messageType",
-          date: "$chat.date".toString(), //
-          chatDate: {
-            // sorting date
-            $dateFromString: {
-              dateString: "$chat.date".toString(),
-            },
-          },
+          // date: "$chat.date".toString(), //
+          // chatDate: {
+          //   // sorting date
+          //   $dateFromString: {
+          //     dateString: "$chat.date".toString(),
+          //   },
+          // },
           userId: "$user._id",
           name: "$user.name",
           profileImage: "$user.profileImage",
@@ -184,7 +184,7 @@ exports.getChatThumbList = async (req, res) => {
           video: 1,
         },
       },
-      { $sort: { chatDate: -1 } },
+     // { $sort: { chatDate: -1 } },
       {
         $facet: {
           list: [
