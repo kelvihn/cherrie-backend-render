@@ -171,7 +171,7 @@ exports.getChatThumbList = async (req, res) => {
           messageType: "$chat.messageType",
           // date: "$chat.date", //
           // chatDate: {
-          //   // sorting date
+          //   // sorting time
           //   $dateFromString: {
           //     dateString: "$chat.date",
           //   },
