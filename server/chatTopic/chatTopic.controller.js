@@ -176,6 +176,7 @@ exports.getChatThumbList = async (req, res) => {
           //     dateString: "$chat.date",
           //   },
           // },
+          createdAt: "$chat.createdAt",
           userId: "$user._id",
           name: "$user.name",
           profileImage: "$user.profileImage",
