@@ -112,11 +112,11 @@ const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 
 //mongodb connection
-mongoose.connect(`mongodb+srv://kelvinroyomoni:12KAreokeko@cluster0.eajwlu7.mongodb.net/`, {
+mongoose.connect(`mongodb+srv://kelvinroyomoni:12KAreokeko@cluster0.eajwlu7.mongodb.net/`, 
+{
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  // useFindAndModify: false,
-  // useCreateIndex: true,
+  enableUtf8Validation: false
 });
 
 const db = mongoose.connection;
