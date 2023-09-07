@@ -229,11 +229,18 @@ exports.getChatThumbList = async (req, res) => {
       },
     ]);
 
-    let now = dayjs().tz("Australia/Sydney");
+    let now = dayjs().tz("Africa/Lagos");
 
     const chatList_ = chatList[0].list.map((data) => ({
       ...data,
-      time: "12pm",
+      time: `${data.createdAt}`
+      // time:
+      //   now.diff(data.date, "minute") <= -290 &&
+      //   now.diff(data.date, "minute") >= -330
+      //     ? now.diff(data.date, "minute") + 329 + " minutes ago"
+      //     : now.diff(data.date, "hour") >= 24
+      //     ? dayjs(data.date).format("DD MMM, YYYY")
+      //     : now.diff(data.date, "hour") + 4 + " hour ago",
     }));
     console.log("fakeUserList", fakeUserList);
     console.log("chatList", chatList);
