@@ -233,14 +233,14 @@ exports.getChatThumbList = async (req, res) => {
 
     const chatList_ = chatList[0].list.map((data) => ({
       ...data,
-      time:
-        now.diff(data.createdAt, "minute") <= -290 &&
-        now.diff(data.createdAt, "minute") >= -330
-          ? now.diff(data.createdAt, "minute") + 329 + " minutes ago"
-          : now.diff(data.createdAt, "hour") >= 24
-          ? dayjs(data.createdAt).format("DD MMM, YYYY")
-          : now.diff(data.createdAt, "hour") + 4 + " hour ago",
-      //time: data.createdAt
+      // time:
+      //   now.diff(data.createdAt, "minute") <= -290 &&
+      //   now.diff(data.createdAt, "minute") >= -330
+      //     ? now.diff(data.createdAt, "minute") + 329 + " minutes ago"
+      //     : now.diff(data.createdAt, "hour") >= 24
+      //     ? dayjs(data.createdAt).format("DD MMM, YYYY")
+      //     : now.diff(data.createdAt, "hour") + 4 + " hour ago",
+      time: data.createdAt.toString()
     }));
     console.log("fakeUserList", fakeUserList);
     console.log("chatList", chatList);
