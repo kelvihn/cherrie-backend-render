@@ -169,11 +169,11 @@ exports.getChatThumbList = async (req, res) => {
           topic: "$_id",
           message: "$chat.message",
           messageType: "$chat.messageType",
-          date: "$chat.date", //
+          date: "$chat.date".toString(), //
           chatDate: {
             // sorting date
             $dateFromString: {
-              dateString: "$chat.date",
+              dateString: "$chat.date".toString(),
             },
           },
           userId: "$user._id",
