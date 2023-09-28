@@ -39,7 +39,7 @@ exports.store = async (req, res) => {
     chat.senderId = req.body.senderId;
     chat.topicId = chatTopic._id;
     chat.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
     console.log("-----", req.body);
     console.log("-----", req.files);
@@ -99,7 +99,7 @@ exports.store = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
+    return res.status(200).json({
       status: false,
       error: error.message || "Internal Server Error!!",
     });

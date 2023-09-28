@@ -394,7 +394,7 @@ io.on("connect", async (socket) => {
       userSpend.receiverId = receiverUser._id;
       userSpend.giftId = gift._id;
       userSpend.date = new Date().toLocaleString("en-US", {
-        timeZone: "Asia/Kolkata",
+        timeZone: "Africa/Lagos",
       });
 
       await userSpend.save();
@@ -411,7 +411,7 @@ io.on("connect", async (socket) => {
       userEarn.userId = senderUser._id;
       userEarn.giftId = gift._id;
       userEarn.date = new Date().toLocaleString("en-US", {
-        timeZone: "Asia/Kolkata",
+        timeZone: "Africa/Lagos",
       });
 
       await userEarn.save();
@@ -426,7 +426,7 @@ io.on("connect", async (socket) => {
           liveStreamingHistory.diamond += parseInt(number);
           liveStreamingHistory.gift += 1;
           // liveStreamingHistory.endTime = new Date().toLocaleString("en-US", {
-          //   timeZone: "Asia/Kolkata",
+          //   timeZone: "Africa/Lagos",
           // });
 
           await liveStreamingHistory.save();
@@ -490,7 +490,7 @@ io.on("connect", async (socket) => {
         chat.video = null;
         chat.topicId = chatTopic._id;
         chat.date = new Date().toLocaleString("en-US", {
-          timeZone: "Asia/Kolkata",
+          timeZone: "Africa/Lagos",
         });
         await chat.save();
 
@@ -595,7 +595,7 @@ io.on("connect", async (socket) => {
         chat.video = null;
         chat.topicId = chatTopic._id;
         chat.date = new Date().toLocaleString("en-US", {
-          timeZone: "Asia/Kolkata",
+          timeZone: "Africa/Lagos",
         });
         await chat.save();
 
@@ -658,7 +658,7 @@ io.on("connect", async (socket) => {
         userSpend.receiverId = receiverUser._id;
         userSpend.giftId = gift._id;
         userSpend.date = new Date().toLocaleString("en-US", {
-          timeZone: "Asia/Kolkata",
+          timeZone: "Africa/Lagos",
         });
 
         await userSpend.save();
@@ -677,7 +677,7 @@ io.on("connect", async (socket) => {
         userEarn.userId = senderUser._id;
         userEarn.giftId = gift._id;
         userEarn.date = new Date().toLocaleString("en-US", {
-          timeZone: "Asia/Kolkata",
+          timeZone: "Africa/Lagos",
         });
 
         await userEarn.save();
@@ -778,7 +778,7 @@ io.on("connect", async (socket) => {
     chat.audio = null;
     chat.video = null;
     chat.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     await chat.save();
@@ -875,7 +875,7 @@ io.on("connect", async (socket) => {
             $set: {
               callConnect: true,
               callStartTime: new Date().toLocaleString("en-US", {
-                timeZone: "Asia/Kolkata",
+                timeZone: "Africa/Lagos",
               }),
             },
           },
@@ -1032,7 +1032,7 @@ io.on("connect", async (socket) => {
           {
             $set: {
               callEndTime: new Date().toLocaleString("en-US", {
-                timeZone: "Asia/Kolkata",
+                timeZone: "Africa/Lagos",
               }),
               duration:
                 moment.utc(
@@ -1141,7 +1141,7 @@ io.on("connect", async (socket) => {
       if (user.isLive) {
         if (liveStreamingHistory) {
           liveStreamingHistory.endTime = new Date().toLocaleString("en-US", {
-            timeZone: "Asia/Kolkata",
+            timeZone: "Africa/Lagos",
           });
 
           liveStreamingHistory.duration =
@@ -1235,7 +1235,7 @@ io.on("connect", async (socket) => {
             {
               $set: {
                 callEndTime: new Date().toLocaleString("en-US", {
-                  timeZone: "Asia/Kolkata",
+                  timeZone: "Africa/Lagos",
                 }),
                 duration:
                   moment.utc(

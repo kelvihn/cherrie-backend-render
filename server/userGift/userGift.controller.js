@@ -98,7 +98,7 @@ exports.sendGift = async (req, res) => {
     userSpend.receiverId = receiverId._id;
     userSpend.giftId = gift._id;
     userSpend.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     await userSpend.save();
@@ -113,7 +113,7 @@ exports.sendGift = async (req, res) => {
     userEarn.userId = user._id;
     userEarn.giftId = gift._id;
     userEarn.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     await userEarn.save();

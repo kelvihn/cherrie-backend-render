@@ -35,7 +35,7 @@ exports.addPost = async (req, res) => {
     post.description = req.body.description;
     post.postImage = baseURL + req.file.path;
     post.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     await post.save();

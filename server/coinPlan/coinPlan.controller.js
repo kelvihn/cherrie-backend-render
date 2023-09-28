@@ -225,7 +225,7 @@ exports.createHistory = async (req, res) => {
       user.purchasedCoin += coinPlan.coin + coinPlan.extraCoin;
       user.isCoinPlan = true;
       user.plan.planStartDate = new Date().toLocaleString("en-US", {
-        timeZone: "Asia/Kolkata",
+        timeZone: "Africa/Lagos",
       });
       user.plan.coinPlanId = coinPlan._id;
 
@@ -240,7 +240,7 @@ exports.createHistory = async (req, res) => {
       history.type = 2;
       history.paymentGateway = req.body.paymentGateway; // 1.GooglePlay 2.RazorPay 3.Stripe
       history.date = new Date().toLocaleString("en-US", {
-        timeZone: "Asia/Kolkata",
+        timeZone: "Africa/Lagos",
       });
 
       await history.save();

@@ -28,7 +28,7 @@ exports.comment = async (req, res) => {
     comment.userId = user._id;
     comment.comment = req.body.comment;
     comment.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     await comment.save();

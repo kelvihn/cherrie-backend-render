@@ -780,7 +780,7 @@ exports.addOrLessCoin = async (req, res) => {
     history.userId = user._id;
     history.type = 3;
     history.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
     await history.save();
     return res.status(200).json({

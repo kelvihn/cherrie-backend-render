@@ -545,7 +545,7 @@ exports.historyAdmin = async (req, res) => {
 //     outgoing.isIncome = false;
 //     outgoing.receiverId = receiver._id; //call receiver receiverId
 //     outgoing.date = new Date().toLocaleString("en-US", {
-//       timeZone: "Asia/Kolkata",
+//       timeZone: "Africa/Lagos",
 //     });
 //     outgoing.callUniqueId = outgoing._id;
 
@@ -559,7 +559,7 @@ exports.historyAdmin = async (req, res) => {
 //     income.isIncome = true;
 //     income.receiverId = receiver._id; //call receiver receiverId
 //     income.date = new Date().toLocaleString("en-US", {
-//       timeZone: "Asia/Kolkata",
+//       timeZone: "Africa/Lagos",
 //     });
 //     income.callUniqueId = income._id;
 
@@ -675,7 +675,7 @@ exports.makeCall = async (req, res) => {
     outgoing.isIncome = false;
     outgoing.receiverId = receiverUser._id; //call receiver hostId
     outgoing.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
     outgoing.callUniqueId = outgoing._id;
     await outgoing.save();
@@ -687,7 +687,7 @@ exports.makeCall = async (req, res) => {
     income.isIncome = true;
     income.receiverId = receiverUser._id; //call receiver hostId
     income.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
     income.callUniqueId = outgoing._id;
 

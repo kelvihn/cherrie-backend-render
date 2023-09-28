@@ -67,7 +67,7 @@ exports.userIsLive = async (req, res) => {
       : user.profileImage;
     liveStreamingHistory.profileImage = user.profileImage;
     liveStreamingHistory.startTime = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     await liveStreamingHistory.save();

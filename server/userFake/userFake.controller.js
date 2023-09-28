@@ -229,7 +229,7 @@ exports.addFakePost = async (req, res) => {
     post.description = req.body.description;
     post.postImage = config.baseURL + req.file.path;
     post.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     await post.save();
@@ -267,7 +267,7 @@ exports.userFakeUpdatePost = async (req, res) => {
       : post.description;
     post.isFake = true;
     post.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     if (req.file) {
@@ -385,7 +385,7 @@ exports.fakeUserCutCoin = async (req, res) => {
     userSpend.receiverId = receiver._id;
     userSpend.giftId = gift._id;
     userSpend.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     await userSpend.save();
@@ -400,7 +400,7 @@ exports.fakeUserCutCoin = async (req, res) => {
     userEarn.userId = sender._id;
     userEarn.giftId = gift._id;
     userEarn.date = new Date().toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "Africa/Lagos",
     });
 
     await userEarn.save();
