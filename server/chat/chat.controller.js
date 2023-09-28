@@ -17,7 +17,9 @@ var config = require("../../config");
 var fcm = new FCM(config.SERVER_KEY);
 
 //create chat [with image,video,audio]
+
 exports.store = async (req, res) => {
+  console.log("receiverUseer is  ", receiverUser);
   try {
     if (!req.body.topicId || !req.body.messageType || !req.body.senderId)
       return res
