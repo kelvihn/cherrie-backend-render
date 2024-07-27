@@ -101,7 +101,7 @@ exports.store = async (req, res) => {
     }
   } catch (error) {
     console.log("error is ===> ", error);
-    return res.status(200).json({
+    return res.status(500).json({
       status: false,
       error: error.message || "Internal Server Error!!",
     });
