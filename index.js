@@ -135,7 +135,6 @@ io.on("connect", async (socket) => {
 
   // Global Socket For Login User
   const { globalRoom } = socket.handshake.query;
-  console.log("------globalRoom Connect------", globalRoom);
 
   //socket join into room
   socket.join(globalRoom);
