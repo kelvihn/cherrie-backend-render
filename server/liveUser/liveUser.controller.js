@@ -62,12 +62,15 @@ exports.userIsLive = async (req, res) => {
 
     await user.save();
 
-    const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
-
     liveStreamingHistory.userId = user._id;
-    liveStreamingHistory.coverImage = req.file
-      ? cloudinaryUrl
-      : user.profileImage;
+
+    if (req.file) {
+      const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+      liveStreamingHistory.coverImage = req.file
+        ? cloudinaryUrl
+        : user.profileImage;
+    }
+
     liveStreamingHistory.profileImage = user.profileImage;
     liveStreamingHistory.startTime = new Date().toLocaleString('en-US', {
       timeZone: 'Africa/Lagos',
@@ -85,7 +88,11 @@ exports.userIsLive = async (req, res) => {
       liveUser.liveStreamingId = liveStreamingHistory._id;
       liveUser.agoraUID = req.body.agoraUID;
       liveUser.diamond = user.diamond;
-      liveUser.coverImage = req.file ? cloudinaryUrl : user.profileImage;
+
+      if (req.file) {
+        const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+        liveUser.coverImage = req.file ? cloudinaryUrl : user.profileImage;
+      }
 
       liveUserStreaming = await LiveUserFunction(liveUser, user);
     } else {
