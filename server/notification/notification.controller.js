@@ -1,6 +1,6 @@
 const User = require('../user/user.model');
 const Notification = require('./notification.model');
-const cloudinaryService = require('../../util/CloudinaryService');
+const cloudinaryService = require('../../util/cloudinary');
 
 //FCM node
 const config = require('../../config');

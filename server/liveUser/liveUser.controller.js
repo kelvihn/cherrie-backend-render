@@ -8,7 +8,7 @@ const { RtcRole, RtcTokenBuilder } = require('agora-access-token');
 const config = require('../../config');
 var FCM = require('fcm-node');
 var fcm = new FCM(config.SERVER_KEY);
-const cloudinaryService = require('../../util/CloudinaryService');
+const cloudinaryService = require('../../util/cloudinary');
 
 exports.userIsLive = async (req, res) => {
   try {

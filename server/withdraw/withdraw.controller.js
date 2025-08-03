@@ -2,7 +2,7 @@ const Withdraw = require('./withdraw.model');
 
 const { deleteFile } = require('../../util/deleteFile');
 const fs = require('fs');
-const cloudinaryService = require('../../util/CloudinaryService');
+const cloudinaryService = require('../../util/cloudinary');
 
 //Create Withdraw
 exports.store = async (req, res) => {

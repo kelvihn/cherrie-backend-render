@@ -1,5 +1,5 @@
 const Banner = require('./banner.model');
-const cloudinaryService = require('../../util/CloudinaryService');
+const cloudinaryService = require('../../util/cloudinary');
 
 const { deleteFile } = require('../../util/deleteFile');
 const fs = require('fs');

@@ -10,7 +10,7 @@ const Gift = require('../gift/gift.model');
 const Comment = require('../comment/comment.model');
 const Like = require('../like/like.model');
 const fs = require('fs');
-const cloudinaryService = require('../../util/CloudinaryService');
+const cloudinaryService = require('../../util/cloudinary');
 
 //moment
 const moment = require('moment');

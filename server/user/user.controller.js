@@ -8,7 +8,7 @@ const { default: mongoose } = require('mongoose');
 const UserGift = require('../userGift/userGift.model');
 const Comment = require('../comment/comment.model');
 const Like = require('../like/like.model');
-const cloudinaryService = require('../../util/CloudinaryService');
+const cloudinaryService = require('../../util/cloudinary');
 
 //moment
 const moment = require('moment');

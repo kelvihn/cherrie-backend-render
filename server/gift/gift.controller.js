@@ -1,6 +1,6 @@
 const Gift = require('./gift.model');
 const fs = require('fs');
-const cloudinaryService = require('../../util/CloudinaryService');
+const cloudinaryService = require('../../util/cloudinary');
 
 //deleteFile
 const { deleteFiles, deleteFile } = require('../../util/deleteFile');

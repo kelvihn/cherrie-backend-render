@@ -7,7 +7,7 @@ const Block = require('../block/block.model');
 const UserGift = require('../userGift/userGift.model');
 const Notification = require('../notification/notification.model');
 const { baseURL } = require('../../config');
-const cloudinaryService = require('../../util/CloudinaryService');
+const cloudinaryService = require('../../util/cloudinary');
 
 const config = require('../../config');
 var FCM = require('fcm-node');
