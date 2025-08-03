@@ -1,135 +1,140 @@
-const express = require("express");
+// At the very top of your main file
+require('dotenv').config();
+
+const express = require('express');
 const app = express();
 app.use(express.json());
-const cors = require("cors");
+const cors = require('cors');
 app.use(cors());
 
-const config = require("./config");
-const { roundNumber } = require("./util/roundNumber");
+const config = require('./config');
+const { roundNumber } = require('./util/roundNumber');
 //moment
-const moment = require("moment");
+const moment = require('moment');
 
 //FCM node
-var FCM = require("fcm-node");
+var FCM = require('fcm-node');
 var fcm = new FCM(config.SERVER_KEY);
 
 //Socket.io Server
-const http = require("http");
+const http = require('http');
 const server = http.createServer(app);
-const io = require("socket.io")(server);
+const io = require('socket.io')(server);
 module.exports = io;
 
-const path = require("path");
-app.use(express.static(path.join(__dirname, "public")));
-app.use("/storage", express.static(path.join(__dirname, "storage")));
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/storage', express.static(path.join(__dirname, 'storage')));
 
-const User = require("./server/user/user.model");
+const User = require('./server/user/user.model');
 
 //Admin Route
-const adminRouter = require("./server/admin/admin.route");
-app.use("/admin", adminRouter);
+const adminRouter = require('./server/admin/admin.route');
+app.use('/admin', adminRouter);
 
-const DashboardRoute = require("./server/dashboard/dashboard.route");
-app.use("/dashboard", DashboardRoute);
+const DashboardRoute = require('./server/dashboard/dashboard.route');
+app.use('/dashboard', DashboardRoute);
 
-const UserRoute = require("./server/user/user.route");
-app.use("/user", UserRoute);
+const UserRoute = require('./server/user/user.route');
+app.use('/user', UserRoute);
 
-const UserFakeRoute = require("./server/userFake/userFake.route");
-app.use("/userFake", UserFakeRoute);
+const UserFakeRoute = require('./server/userFake/userFake.route');
+app.use('/userFake', UserFakeRoute);
 
-const Setting = require("./server/setting/setting.model");
-const SettingRoute = require("./server/setting/setting.route");
-app.use("/setting", SettingRoute);
+const Setting = require('./server/setting/setting.model');
+const SettingRoute = require('./server/setting/setting.route');
+app.use('/setting', SettingRoute);
 
-const FlagRoute = require("./server/flag/flag.route");
-app.use("/flag", FlagRoute);
+const FlagRoute = require('./server/flag/flag.route');
+app.use('/flag', FlagRoute);
 
-const BannerRoute = require("./server/banner/banner.route");
-app.use("/banner", BannerRoute);
+const BannerRoute = require('./server/banner/banner.route');
+app.use('/banner', BannerRoute);
 
-const CoinPlanRoute = require("./server/coinPlan/coinPlan.route");
-app.use("/coinPlan", CoinPlanRoute);
+const CoinPlanRoute = require('./server/coinPlan/coinPlan.route');
+app.use('/coinPlan', CoinPlanRoute);
 
-const FollowRoute = require("./server/follow/follow.route");
-app.use("/follow", FollowRoute);
+const FollowRoute = require('./server/follow/follow.route');
+app.use('/follow', FollowRoute);
 
-const PostRoute = require("./server/post/post.route");
-app.use("/post", PostRoute);
+const PostRoute = require('./server/post/post.route');
+app.use('/post', PostRoute);
 
-const Gift = require("./server/gift/gift.model");
-const GiftRoute = require("./server/gift/gift.route");
-app.use("/gift", GiftRoute);
+const Gift = require('./server/gift/gift.model');
+const GiftRoute = require('./server/gift/gift.route');
+app.use('/gift', GiftRoute);
 
-const UserGiftRoute = require("./server/userGift/userGift.route");
-app.use("/userGift", UserGiftRoute);
+const UserGiftRoute = require('./server/userGift/userGift.route');
+app.use('/userGift', UserGiftRoute);
 
-const LikeRoute = require("./server/like/like.route");
-app.use("/like", LikeRoute);
+const LikeRoute = require('./server/like/like.route');
+app.use('/like', LikeRoute);
 
-const CommentRoute = require("./server/comment/comment.route");
-app.use("/comment", CommentRoute);
+const CommentRoute = require('./server/comment/comment.route');
+app.use('/comment', CommentRoute);
 
-const ReportRoute = require("./server/report/report.route");
-app.use("/report", ReportRoute);
+const ReportRoute = require('./server/report/report.route');
+app.use('/report', ReportRoute);
 
-const BlockRoute = require("./server/block/block.route");
-app.use("/block", BlockRoute);
+const BlockRoute = require('./server/block/block.route');
+app.use('/block', BlockRoute);
 
-const RedeemRoute = require("./server/redeem/redeem.route");
-app.use("/redeem", RedeemRoute);
+const RedeemRoute = require('./server/redeem/redeem.route');
+app.use('/redeem', RedeemRoute);
 
-const NotificationRoute = require("./server/notification/notification.route");
-app.use("/notification", NotificationRoute);
+const NotificationRoute = require('./server/notification/notification.route');
+app.use('/notification', NotificationRoute);
 
-const ChatTopic = require("./server/chatTopic/chatTopic.model");
-const ChatTopicRoute = require("./server/chatTopic/chatTopic.route");
-app.use("/chatTopic", ChatTopicRoute);
+const ChatTopic = require('./server/chatTopic/chatTopic.model');
+const ChatTopicRoute = require('./server/chatTopic/chatTopic.route');
+app.use('/chatTopic', ChatTopicRoute);
 
-const Chat = require("./server/chat/chat.model");
-const ChatRoute = require("./server/chat/chat.route");
-app.use("/chat", ChatRoute);
+const Chat = require('./server/chat/chat.model');
+const ChatRoute = require('./server/chat/chat.route');
+app.use('/chat', ChatRoute);
 
-const LiveView = require("./server/liveView/liveView.model");
-const LiveStreamingHistory = require("./server/liveStreamingHistory/liveStreamingHistory.model");
-const LiveUser = require("./server/liveUser/liveUser.model");
-const LiveUserRoute = require("./server/liveUser/liveUser.route");
-app.use("/liveUSer", LiveUserRoute);
+const LiveView = require('./server/liveView/liveView.model');
+const LiveStreamingHistory = require('./server/liveStreamingHistory/liveStreamingHistory.model');
+const LiveUser = require('./server/liveUser/liveUser.model');
+const LiveUserRoute = require('./server/liveUser/liveUser.route');
+app.use('/liveUSer', LiveUserRoute);
 
-const WithdrawRoute = require("./server/withdraw/withdraw.route");
-app.use("/withdraw", WithdrawRoute);
+const WithdrawRoute = require('./server/withdraw/withdraw.route');
+app.use('/withdraw', WithdrawRoute);
 
-const History = require("./server/history/history.model");
-const HistoryRoute = require("./server/history/history.route");
-app.use("/history", HistoryRoute);
+const History = require('./server/history/history.model');
+const HistoryRoute = require('./server/history/history.route');
+app.use('/history', HistoryRoute);
 
 //public index.html file For React Server
 // app.get("/*", function (req, res) {
 //   res.status(200).sendFile(path.join(__dirname, "public", "index.html"));
 // });
 
-const mongoose = require("mongoose");
-mongoose.set("strictQuery", false);
+const mongoose = require('mongoose');
+mongoose.set('strictQuery', false);
 
 //mongodb connection
-mongoose.connect(`mongodb+srv://kelvinroyomoni:12KAreokeko@cluster0.eajwlu7.mongodb.net/`, 
-{
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  enableUtf8Validation: false
-});
+mongoose.connect(
+  `mongodb+srv://kelvinroyomoni:12KAreokeko@cluster0.eajwlu7.mongodb.net/`,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    enableUtf8Validation: false,
+  }
+);
 
 const db = mongoose.connection;
 
-db.on("error", console.error.bind(console, "connection error:"));
-db.once("open", () => {
-  console.log("MONGO: successfully connected to db");
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', () => {
+  console.log('MONGO: successfully connected to db');
 });
 
 // ===================================================================== Socket Connection =========================================================================
 
-io.on("connect", async (socket) => {
-  console.log("Socket Is Connect Successfully.....!");
+io.on('connect', async (socket) => {
+  console.log('Socket Is Connect Successfully.....!');
 
   // $$$$$$$$$$$$$$$$$$$$$$$$$ User Online $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
@@ -141,7 +146,7 @@ io.on("connect", async (socket) => {
 
   //host Is Online
   if (globalRoom) {
-    console.log("check In globalRoom Connect ==================>", globalRoom);
+    console.log('check In globalRoom Connect ==================>', globalRoom);
     const user = await User.findById(globalRoom);
 
     user.isOnline = true;
@@ -154,7 +159,7 @@ io.on("connect", async (socket) => {
     ? JSON.parse(socket.handshake.query.obj)
     : null;
 
-  console.log("------------ OBJ", socket.handshake.query.obj);
+  console.log('------------ OBJ', socket.handshake.query.obj);
   let liveRoom, liveUserRoom, showUserRoom;
 
   if (live !== null) {
@@ -163,9 +168,9 @@ io.on("connect", async (socket) => {
     showUserRoom = live.showUserRoom;
   }
 
-  console.log("------liveRoom------", liveRoom);
-  console.log("------liveUserRoom------", liveUserRoom);
-  console.log("------showUserRoom------", showUserRoom);
+  console.log('------liveRoom------', liveRoom);
+  console.log('------liveUserRoom------', liveUserRoom);
+  console.log('------showUserRoom------', showUserRoom);
 
   socket.join(liveRoom); // liveUser's LiveStreamingId
   socket.join(liveUserRoom); // liveUser's userId
@@ -173,9 +178,9 @@ io.on("connect", async (socket) => {
 
   // ===================== Add View Socket =====================
 
-  socket.on("addView", async (data) => {
-    console.log("========= addView In Data =========", data);
-    console.log("========= addView In LiveRoom =========", liveRoom);
+  socket.on('addView', async (data) => {
+    console.log('========= addView In Data =========', data);
+    console.log('========= addView In LiveRoom =========', liveRoom);
 
     const liveStreamingHistory = await LiveStreamingHistory.findById(
       data.liveStreamingId
@@ -190,30 +195,30 @@ io.on("connect", async (socket) => {
     // }
 
     const liveUser = await LiveUser.findById(data.mongoId);
-    console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 000", liveUser);
+    console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 000', liveUser);
 
     if (liveUser) {
       const joinedUserExist = await LiveUser.findOne({
         _id: liveUser._id,
-        "view.userId": data.userId,
+        'view.userId': data.userId,
       });
 
-      console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 111", joinedUserExist);
+      console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 111', joinedUserExist);
 
       if (joinedUserExist) {
         await LiveUser.updateOne(
-          { _id: liveUser._id, "view.userId": data.userId },
+          { _id: liveUser._id, 'view.userId': data.userId },
           {
             $set: {
-              "view.$.userId": data.userId,
-              "view.$.name": data.name,
-              "view.$.profileImage": data.profileImage,
-              "view.$.liveStreamingId": data.liveStreamingId,
-              "view.$.isAdd": true,
+              'view.$.userId': data.userId,
+              'view.$.name': data.name,
+              'view.$.profileImage': data.profileImage,
+              'view.$.liveStreamingId': data.liveStreamingId,
+              'view.$.isAdd': true,
             },
           }
         );
-        console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 222", joinedUserExist);
+        console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 222', joinedUserExist);
       } else {
         liveUser.view.push({
           userId: data.userId,
@@ -224,7 +229,7 @@ io.on("connect", async (socket) => {
         });
 
         console.log(
-          "%%%%%%%%%%%%%%%%%%%%%% Live User %%%%%%%%%%%%%%%%%%%%%%",
+          '%%%%%%%%%%%%%%%%%%%%%% Live User %%%%%%%%%%%%%%%%%%%%%%',
           liveUser
         );
 
@@ -247,49 +252,48 @@ io.on("connect", async (socket) => {
       liveStreamingHistory.userView = liveUser.view.length;
       liveStreamingHistory.endTime = new Date().toLocaleString();
       await liveStreamingHistory.save();
-      io.in(liveRoom).emit("view", liveUser.view);
+      io.in(liveRoom).emit('view', liveUser.view);
     }
   });
 
   // ===================== Less View Socket =====================
 
-  socket.on("lessView", async (data) => {
-    console.log("========= lessView In Data =========", data);
-    console.log("========= lessView In LiveRoom =========", liveRoom);
-
+  socket.on('lessView', async (data) => {
+    console.log('========= lessView In Data =========', data);
+    console.log('========= lessView In LiveRoom =========', liveRoom);
 
     const liveStreamingHistory = await LiveStreamingHistory.findById(
       data.liveStreamingId
     );
 
     await LiveUser.updateOne(
-      { _id: data.mongoId, "view.userId": data.userId },
+      { _id: data.mongoId, 'view.userId': data.userId },
       {
         $set: {
-          "view.$.isAdd": false,
+          'view.$.isAdd': false,
         },
       }
     );
 
     const liveUser = await LiveUser.findOne({
       _id: data.mongoId,
-      "view.isAdd": true,
+      'view.isAdd': true,
     });
 
-    console.log("-----------liveUser-----------", liveUser);
+    console.log('-----------liveUser-----------', liveUser);
 
     if (liveStreamingHistory) {
       liveStreamingHistory.endTime = new Date().toLocaleString();
       await liveStreamingHistory.save();
     }
-    await io.in(liveRoom).emit("view", liveUser ? liveUser.view : []);
+    await io.in(liveRoom).emit('view', liveUser ? liveUser.view : []);
   });
 
   // ===================== Comment In Live User Socket =====================
 
-  socket.on("comment", async (data) => {
-    console.log("========= Comment In Data =========", data);
-    console.log("========= Comment In LiveRoom =========", liveRoom);
+  socket.on('comment', async (data) => {
+    console.log('========= Comment In Data =========', data);
+    console.log('========= Comment In LiveRoom =========', liveRoom);
 
     // liveRoom = LiveStreamingId
 
@@ -301,13 +305,13 @@ io.on("connect", async (socket) => {
       liveStreamingHistory.comment += 1;
       await liveStreamingHistory.save();
     }
-    io.in(liveRoom).emit("comment", data);
+    io.in(liveRoom).emit('comment', data);
   });
 
   // ===================== Send Gift In Live User Socket =====================
 
-  socket.on("UserGift", async (data) => {
-    console.log("========= User Gift In Data =========", data);
+  socket.on('UserGift', async (data) => {
+    console.log('========= User Gift In Data =========', data);
 
     // senderUserId
     // receiverUserId
@@ -316,7 +320,7 @@ io.on("connect", async (socket) => {
     // liveStreamingId
 
     const giftData = data.gift; //giftId
-    console.log("========= User Gift =========", giftData);
+    console.log('========= User Gift =========', giftData);
 
     const senderUser = await User.findById(data.senderUserId);
     const receiverUser = await User.findById(data.receiverUserId);
@@ -324,7 +328,7 @@ io.on("connect", async (socket) => {
     const gift = await Gift.findById(giftData._id);
 
     console.log(
-      "<==================== User Gift Check ====================>",
+      '<==================== User Gift Check ====================>',
       data,
       senderUser,
       receiverUser
@@ -333,9 +337,9 @@ io.on("connect", async (socket) => {
     const number = await roundNumber(data.coin);
 
     if (senderUser.coin < number) {
-      console.log("--------1.emit chat event------");
+      console.log('--------1.emit chat event------');
 
-      return io.in(chatRoom).emit("chat", null, "Insufficient coin");
+      return io.in(chatRoom).emit('chat', null, 'Insufficient coin');
     }
 
     if (senderUser && receiverUser) {
@@ -350,7 +354,7 @@ io.on("connect", async (socket) => {
       await receiverUser.save();
 
       console.log(
-        "<==================== User Gift Emit ====================>",
+        '<==================== User Gift Emit ====================>',
         data,
         senderUser,
         receiverUser
@@ -360,7 +364,7 @@ io.on("connect", async (socket) => {
         data.liveStreaming
       );
       console.log(
-        "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ liveStreamingHistory  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ",
+        '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ liveStreamingHistory  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ',
         liveStreamingHistory
       );
 
@@ -369,12 +373,12 @@ io.on("connect", async (socket) => {
         liveStreamingHistory.diamond += parseInt(number);
         await liveStreamingHistory.save();
         console.log(
-          "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ Afte Save liveStreamingHistory  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ",
+          '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ Afte Save liveStreamingHistory  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ',
           liveStreamingHistory
         );
       }
 
-      io.in(liveRoom).emit("gift", data, senderUser, receiverUser);
+      io.in(liveRoom).emit('gift', data, senderUser, receiverUser);
 
       // Add Diamond Count In Live User ThumbList
       const liveUser = await LiveUser.findOne({
@@ -392,8 +396,8 @@ io.on("connect", async (socket) => {
       userSpend.isIncome = false;
       userSpend.receiverId = receiverUser._id;
       userSpend.giftId = gift._id;
-      userSpend.date = new Date().toLocaleString("en-US", {
-        timeZone: "Africa/Lagos",
+      userSpend.date = new Date().toLocaleString('en-US', {
+        timeZone: 'Africa/Lagos',
       });
 
       await userSpend.save();
@@ -409,8 +413,8 @@ io.on("connect", async (socket) => {
       userEarn.isIncome = true;
       userEarn.userId = senderUser._id;
       userEarn.giftId = gift._id;
-      userEarn.date = new Date().toLocaleString("en-US", {
-        timeZone: "Africa/Lagos",
+      userEarn.date = new Date().toLocaleString('en-US', {
+        timeZone: 'Africa/Lagos',
       });
 
       await userEarn.save();
@@ -436,22 +440,22 @@ io.on("connect", async (socket) => {
 
   // ===================== Get Profile Show User Socket =====================
 
-  socket.on("getUserProfile", async (data) => {
-    console.log("=========  Get User Profile In Data =========", data);
+  socket.on('getUserProfile', async (data) => {
+    console.log('=========  Get User Profile In Data =========', data);
     // userId
     const user = await User.findById(data.userId);
 
-    io.in(liveRoom).emit("getUserProfile", user);
+    io.in(liveRoom).emit('getUserProfile', user);
   });
 
   // ===================== Get Live Block List For Show User Socket =====================
-  socket.on("blockList", (data) => {
-    console.log("========= Block List In Data =========", data);
-    console.log("========= Block List In LiveRoom =========", liveRoom);
+  socket.on('blockList', (data) => {
+    console.log('========= Block List In Data =========', data);
+    console.log('========= Block List In LiveRoom =========', liveRoom);
 
     // liveRoom = liveStreamingId
 
-    io.in(liveRoom).emit("blockList", data);
+    io.in(liveRoom).emit('blockList', data);
   });
 
   // $$$$$$$$$$$$$$$$$$$$$$$$$ User Chat $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -462,9 +466,9 @@ io.on("connect", async (socket) => {
   socket.join(chatRoom);
 
   //Chat Socket event
-  socket.on("chat", async (data) => {
-    console.log("========= Chat In Data =========", data);
-    console.log("========= Chat In chatRoom =========", chatRoom);
+  socket.on('chat', async (data) => {
+    console.log('========= Chat In Data =========', data);
+    console.log('========= Chat In chatRoom =========', chatRoom);
 
     // topicId
     // senderId
@@ -473,10 +477,10 @@ io.on("connect", async (socket) => {
 
     if (data.messageType == 0) {
       const chatTopic = await ChatTopic.findById(data.topicId).populate(
-        "senderId receiverId"
+        'senderId receiverId'
       );
 
-      console.log("!!!!!!!!!!! Chat In chatTopic !!!!!!!!!!!", chatTopic);
+      console.log('!!!!!!!!!!! Chat In chatTopic !!!!!!!!!!!', chatTopic);
 
       if (chatTopic) {
         // Create Chat
@@ -488,8 +492,8 @@ io.on("connect", async (socket) => {
         chat.audio = null;
         chat.video = null;
         chat.topicId = chatTopic._id;
-        chat.date = new Date().toLocaleString("en-US", {
-          timeZone: "Africa/Lagos",
+        chat.date = new Date().toLocaleString('en-US', {
+          timeZone: 'Africa/Lagos',
         });
         await chat.save();
 
@@ -497,11 +501,11 @@ io.on("connect", async (socket) => {
         chatTopic.chat = chat._id;
         await chatTopic.save();
         console.log(
-          "((((((((((((((((((((((((((((((((((((((((((( DATA ONLY ))))))))))))))))))))))))))))",
+          '((((((((((((((((((((((((((((((((((((((((((( DATA ONLY ))))))))))))))))))))))))))))',
           data
         );
         console.log(
-          "((((((((((((((((((((((((((((((((((((((((((( chatTopic ONLY ))))))))))))))))))))))))))))",
+          '((((((((((((((((((((((((((((((((((((((((((( chatTopic ONLY ))))))))))))))))))))))))))))',
           chatTopic
         );
 
@@ -520,30 +524,30 @@ io.on("connect", async (socket) => {
               senderName: senderUser.name,
               senderId: senderUser._id,
               chatRoom: chatRoom,
-              type: "CHAT",
+              type: 'CHAT',
             },
           };
           await fcm.send(payload, function (err, response) {
             if (err) {
-              console.log("Something has gone wrong!", err);
+              console.log('Something has gone wrong!', err);
               console.log(
-                "((((((((((((((((((((((((((((((((((((((((((( FAIL CHAT ))))))))))))))))))))))))))))"
+                '((((((((((((((((((((((((((((((((((((((((((( FAIL CHAT ))))))))))))))))))))))))))))'
               );
             } else {
-              console.log("Message Send Successfully!", response);
+              console.log('Message Send Successfully!', response);
               console.log(
-                "((((((((((((((((((((((((((((((((((((((((((( PASS CHAT ))))))))))))))))))))))))))))"
+                '((((((((((((((((((((((((((((((((((((((((((( PASS CHAT ))))))))))))))))))))))))))))'
               );
             }
           });
         }
 
-        console.log("========= 1. Chat Emit =========", chat);
+        console.log('========= 1. Chat Emit =========', chat);
 
-        io.in(chatRoom).emit("chat", chat);
+        io.in(chatRoom).emit('chat', chat);
       }
     } else if (data.messageType == 1) {
-      console.log("========= User Gift In Data =========", data);
+      console.log('========= User Gift In Data =========', data);
 
       // senderUserId
       // receiverUserId
@@ -554,7 +558,7 @@ io.on("connect", async (socket) => {
       // messageType
 
       const giftData = data.gift; //giftId
-      console.log("========= User Gift =========", giftData);
+      console.log('========= User Gift =========', giftData);
 
       const senderUser = await User.findById(data.senderUserId);
       const receiverUser = await User.findById(data.receiverUserId);
@@ -562,10 +566,10 @@ io.on("connect", async (socket) => {
       const gift = await Gift.findById(giftData._id);
 
       const chatTopic = await ChatTopic.findById(data.chatTopic).populate(
-        "senderId receiverId"
+        'senderId receiverId'
       );
 
-      console.log("!!!!!!!!!!! Chat In chatTopic !!!!!!!!!!!", chatTopic);
+      console.log('!!!!!!!!!!! Chat In chatTopic !!!!!!!!!!!', chatTopic);
 
       if (chatTopic) {
         if (
@@ -573,16 +577,16 @@ io.on("connect", async (socket) => {
         ) {
           const user = await User.findById(chatTopic.senderId._id);
 
-          console.log("--------chatTopic.userId._id------", user);
+          console.log('--------chatTopic.userId._id------', user);
 
           if (user.coin < data.coin) {
-            console.log("--------1.emit chat event------");
+            console.log('--------1.emit chat event------');
 
-            return io.in(chatRoom).emit("chat", null, "Insufficient coin");
+            return io.in(chatRoom).emit('chat', null, 'Insufficient coin');
           }
         }
 
-        console.log("Before CHat save", data.senderUserId);
+        console.log('Before CHat save', data.senderUserId);
 
         // Create Chat
         const chat = new Chat();
@@ -593,18 +597,18 @@ io.on("connect", async (socket) => {
         chat.audio = null;
         chat.video = null;
         chat.topicId = chatTopic._id;
-        chat.date = new Date().toLocaleString("en-US", {
-          timeZone: "Africa/Lagos",
+        chat.date = new Date().toLocaleString('en-US', {
+          timeZone: 'Africa/Lagos',
         });
         await chat.save();
 
-        console.log("After CHat save", chat);
+        console.log('After CHat save', chat);
         // Last Message Show In ThumbList
         chatTopic.chat = chat._id;
         await chatTopic.save();
 
         console.log(
-          "========= 2. Chat Gift Emit =========",
+          '========= 2. Chat Gift Emit =========',
           chat,
           senderUser,
           receiverUser
@@ -631,21 +635,21 @@ io.on("connect", async (socket) => {
             },
             data: {
               data: {},
-              type: "CHAT",
+              type: 'CHAT',
             },
           };
           await fcm.send(payload, function (err, response) {
             if (err) {
-              console.log("Something has gone wrong!", err);
+              console.log('Something has gone wrong!', err);
             } else {
-              console.log("Message Send Successfully!", response);
+              console.log('Message Send Successfully!', response);
             }
           });
         }
 
-        console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", chat);
+        console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$', chat);
 
-        io.in(chatRoom).emit("chat", chat);
+        io.in(chatRoom).emit('chat', chat);
 
         //User Spend Coin History
         const userSpend = new History();
@@ -656,8 +660,8 @@ io.on("connect", async (socket) => {
         userSpend.isIncome = false;
         userSpend.receiverId = receiverUser._id;
         userSpend.giftId = gift._id;
-        userSpend.date = new Date().toLocaleString("en-US", {
-          timeZone: "Africa/Lagos",
+        userSpend.date = new Date().toLocaleString('en-US', {
+          timeZone: 'Africa/Lagos',
         });
 
         await userSpend.save();
@@ -675,15 +679,15 @@ io.on("connect", async (socket) => {
         userEarn.isIncome = true;
         userEarn.userId = senderUser._id;
         userEarn.giftId = gift._id;
-        userEarn.date = new Date().toLocaleString("en-US", {
-          timeZone: "Africa/Lagos",
+        userEarn.date = new Date().toLocaleString('en-US', {
+          timeZone: 'Africa/Lagos',
         });
 
         await userEarn.save();
       }
     } else {
-      console.log("========= 2. Chat Emit =========", data);
-      io.in(chatRoom).emit("chat", data);
+      console.log('========= 2. Chat Emit =========', data);
+      io.in(chatRoom).emit('chat', data);
     }
   });
 
@@ -699,7 +703,7 @@ io.on("connect", async (socket) => {
   //videoCallRoom
   if (videoCallRoom) {
     console.log(
-      "%%%%%%%%%%%%%%%%%%%%%% videoCallRoom %%%%%%%%%%%%%%%%%%%%%%",
+      '%%%%%%%%%%%%%%%%%%%%%% videoCallRoom %%%%%%%%%%%%%%%%%%%%%%',
       videoCallRoom
     );
     const history = await History.findById(videoCallRoom);
@@ -712,7 +716,7 @@ io.on("connect", async (socket) => {
         caller.isBusy = true;
         await caller.save();
         console.log(
-          "caller is busy when socket connect --------",
+          'caller is busy when socket connect --------',
           caller.isBusy
         );
       }
@@ -720,7 +724,7 @@ io.on("connect", async (socket) => {
         receiver.isBusy = true;
         await receiver.save();
         console.log(
-          "receiver is busy when socket connect ------",
+          'receiver is busy when socket connect ------',
           receiver.isBusy
         );
       }
@@ -728,13 +732,13 @@ io.on("connect", async (socket) => {
   }
 
   // ===================== callRequest Socket (After API) =====================
-  socket.on("callRequest", (data) => {
-    console.log("========= callRequest In Data =========", data);
-    io.in(data.receiverId).emit("callRequest", data);
+  socket.on('callRequest', (data) => {
+    console.log('========= callRequest In Data =========', data);
+    io.in(data.receiverId).emit('callRequest', data);
   });
   // ===================== callConfirmed Socket (Receiver In Ringing) =====================
-  socket.on("callConfirmed", async (data) => {
-    console.log("========= callConfirmed In Data =========", data);
+  socket.on('callConfirmed', async (data) => {
+    console.log('========= callConfirmed In Data =========', data);
 
     const sender = await User.findById(data.callerId);
     const receiver = await User.findById(data.receiverId);
@@ -772,12 +776,12 @@ io.on("connect", async (socket) => {
     chat.senderId = data.callerId;
     chat.callType = 1;
     chat.messageType = 5;
-    chat.message = "📽 Video Call";
+    chat.message = '📽 Video Call';
     chat.callId = callRoom; //historyId to be stored in callId of chat collection
     chat.audio = null;
     chat.video = null;
-    chat.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    chat.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     await chat.save();
@@ -785,46 +789,46 @@ io.on("connect", async (socket) => {
     if (sender) {
       sender.isBusy = true;
       await sender.save();
-      console.log("=======sender busy in call Confirm=======", sender.isBusy);
+      console.log('=======sender busy in call Confirm=======', sender.isBusy);
     }
     if (receiver) {
       receiver.isBusy = true;
       await receiver.save();
       console.log(
-        "=======receiver busy in call Confirm =======",
+        '=======receiver busy in call Confirm =======',
         receiver.isBusy
       );
     }
 
-    console.log("=======callRoom in call Confirm=======", callRoom);
+    console.log('=======callRoom in call Confirm=======', callRoom);
 
-    io.in(callRoom).emit("callConfirmed", data);
+    io.in(callRoom).emit('callConfirmed', data);
   });
 
   // ===================== callAnswer Socket (Accept Call) =====================
-  socket.on("callAnswer", async (data) => {
-    console.log("========= callAnswer In Data =========", data);
-    console.log("========= callAnswer In callRoom =========", callRoom);
+  socket.on('callAnswer', async (data) => {
+    console.log('========= callAnswer In Data =========', data);
+    console.log('========= callAnswer In callRoom =========', callRoom);
     console.log(
-      "========= callAnswer In videoCallRoom =========",
+      '========= callAnswer In videoCallRoom =========',
       videoCallRoom
     );
 
     const callDetail = await History.findById(callRoom);
     const chat = await Chat.findOne({ callId: callRoom }); //historyId
 
-    console.log("############### data.accept ------", data.accept);
+    console.log('############### data.accept ------', data.accept);
     if (!data.accept) {
       const receiver = await User.findById(callDetail.receiverId);
 
-      console.log("############### receiver ------", receiver);
+      console.log('############### receiver ------', receiver);
       if (receiver) {
         receiver.isBusy = false;
         receiver.isConnect = false;
         await receiver.save();
 
         console.log(
-          "############### receiver busy in call Answer ------",
+          '############### receiver busy in call Answer ------',
           receiver.isBusy
         );
       }
@@ -836,7 +840,7 @@ io.on("connect", async (socket) => {
         await user.save();
 
         console.log(
-          "############### user busy in call Answer -----",
+          '############### user busy in call Answer -----',
           user.isBusy
         );
       }
@@ -848,14 +852,14 @@ io.on("connect", async (socket) => {
       }
     }
 
-    io.in(callRoom).emit("callAnswer", data);
+    io.in(callRoom).emit('callAnswer', data);
   });
 
   // ===================== callReceive Socket (Connect Call) =====================
-  socket.on("callReceive", async (data) => {
-    console.log("========= callReceive In Data =========", data);
+  socket.on('callReceive', async (data) => {
+    console.log('========= callReceive In Data =========', data);
     console.log(
-      "========= callReceive In videoCallRoom =========",
+      '========= callReceive In videoCallRoom =========',
       videoCallRoom
     );
     const callDetail = await History.findById(data.callId);
@@ -873,8 +877,8 @@ io.on("connect", async (socket) => {
           {
             $set: {
               callConnect: true,
-              callStartTime: new Date().toLocaleString("en-US", {
-                timeZone: "Africa/Lagos",
+              callStartTime: new Date().toLocaleString('en-US', {
+                timeZone: 'Africa/Lagos',
               }),
             },
           },
@@ -921,32 +925,32 @@ io.on("connect", async (socket) => {
 
       if (videoCallRoom) {
         console.log(
-          "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& videoCallRoom &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",
+          '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& videoCallRoom &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&',
           videoCallRoom
         );
         console.log(
-          "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& sender &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",
+          '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& sender &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&',
           sender
         );
-        io.in(videoCallRoom).emit("callReceive", sender, receiver);
+        io.in(videoCallRoom).emit('callReceive', sender, receiver);
       } else {
         console.log(
-          "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& sender &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",
+          '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& sender &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&',
           sender
         );
-        io.in(data.videoCallRoom).emit("callReceive", sender, receiver);
+        io.in(data.videoCallRoom).emit('callReceive', sender, receiver);
       }
     }
   });
 
   // ===================== callCancel Socket (Sender Cut Call) =====================
-  socket.on("callCancel", async (data) => {
-    console.log("========= callCancel In Data =========", data);
-    console.log("========= callCancel In callRoom =========", callRoom);
+  socket.on('callCancel', async (data) => {
+    console.log('========= callCancel In Data =========', data);
+    console.log('========= callCancel In callRoom =========', callRoom);
 
     if (callRoom) {
-      console.log(" ================= callCancel emit =================");
-      io.in(callRoom).emit("callCancel", data);
+      console.log(' ================= callCancel emit =================');
+      io.in(callRoom).emit('callCancel', data);
 
       const history = await History.findById(callRoom);
       const receiver = await User.findById(history.receiverId);
@@ -955,13 +959,13 @@ io.on("connect", async (socket) => {
         if (receiver) {
           receiver.isBusy = false;
           await receiver.save();
-          console.log("receiver busy false in call Cancel", receiver.isBusy);
+          console.log('receiver busy false in call Cancel', receiver.isBusy);
         }
 
         if (sender) {
           sender.isBusy = false;
           await sender.save();
-          console.log("sender busy false in call Cancel", sender.isBusy);
+          console.log('sender busy false in call Cancel', sender.isBusy);
         }
       }
       const chatTopic = await ChatTopic.findOne({
@@ -981,13 +985,13 @@ io.on("connect", async (socket) => {
       const chat = await Chat.findOne({ callId: callRoom });
 
       if (chat) {
-        console.log("SENDER &&&&&&&&&&&&&&&&&&&&", history.userId);
+        console.log('SENDER &&&&&&&&&&&&&&&&&&&&', history.userId);
         chat.senderId = history.userId;
         chat.callType = 3; //3.missCall
         chat.isRead = true;
         await chat.save();
 
-        console.log("notification mate aavyu---------------------");
+        console.log('notification mate aavyu---------------------');
 
         const sender = await User.findById(data.callerId);
         const receiver = await User.findById(data.receiverId);
@@ -995,16 +999,16 @@ io.on("connect", async (socket) => {
         const payload = {
           to: receiver.fcm_token,
           notification: {
-            body: "Miscall you",
+            body: 'Miscall you',
             title: sender.name,
           },
         };
 
         await fcm.send(payload, function (err, response) {
           if (response) {
-            console.log("notification sent successfully:", response);
+            console.log('notification sent successfully:', response);
           } else {
-            console.log("Something has gone wrong!!!", err);
+            console.log('Something has gone wrong!!!', err);
           }
         });
       }
@@ -1013,9 +1017,9 @@ io.on("connect", async (socket) => {
 
   // ===================== callDisconnect Socket (Receiver Cut Call) =====================
 
-  socket.on("callDisconnect", async (data) => {
-    console.log("========= callDisconnect In Data =========", data);
-    console.log("========= callDisconnect In callRoom =========", callRoom);
+  socket.on('callDisconnect', async (data) => {
+    console.log('========= callDisconnect In Data =========', data);
+    console.log('========= callDisconnect In callRoom =========', callRoom);
 
     if (callRoom) {
       query = callRoom;
@@ -1030,8 +1034,8 @@ io.on("connect", async (socket) => {
           { callUniqueId: mongoose.Types.ObjectId(data.callId) },
           {
             $set: {
-              callEndTime: new Date().toLocaleString("en-US", {
-                timeZone: "Africa/Lagos",
+              callEndTime: new Date().toLocaleString('en-US', {
+                timeZone: 'Africa/Lagos',
               }),
               duration:
                 moment.utc(
@@ -1047,13 +1051,13 @@ io.on("connect", async (socket) => {
         const chat = await Chat.findOne({ callId: query }); //historyId
 
         console.log(
-          "{{{{{{{{{{{{{{{{{{{{ Before Chat }}}}}}}}}}}}}}}}}}}",
+          '{{{{{{{{{{{{{{{{{{{{ Before Chat }}}}}}}}}}}}}}}}}}}',
           chat
         );
 
         if (chat) {
           console.log(
-            "{{{{{{{{{{{{{{{{{{{{ After Chat }}}}}}}}}}}}}}}}}}}",
+            '{{{{{{{{{{{{{{{{{{{{ After Chat }}}}}}}}}}}}}}}}}}}',
             chat
           );
           chat.callDuration = moment
@@ -1062,7 +1066,7 @@ io.on("connect", async (socket) => {
                 moment(new Date(history.callStartTime))
               )
             )
-            .format("HH:mm:ss");
+            .format('HH:mm:ss');
           chat.callType = 1; // 1. receive
           chat.isRead = true;
           chat.messageType = 5;
@@ -1070,7 +1074,7 @@ io.on("connect", async (socket) => {
         }
 
         console.log(
-          "{{{{{{{{{{{{{{{{{{{{ After SAVE Chat }}}}}}}}}}}}}}}}}}}",
+          '{{{{{{{{{{{{{{{{{{{{ After SAVE Chat }}}}}}}}}}}}}}}}}}}',
           chat
         );
       }
@@ -1085,7 +1089,7 @@ io.on("connect", async (socket) => {
         receiver.isBusy = false;
         await receiver.save();
 
-        console.log("receiver busy in callDisconnect", receiver.isBusy);
+        console.log('receiver busy in callDisconnect', receiver.isBusy);
       }
 
       const user = await User.findById(callHistory[0].userId);
@@ -1094,21 +1098,21 @@ io.on("connect", async (socket) => {
         user.isBusy = false;
         await user.save();
 
-        console.log("user busy in callDisconnect---------", user.isBusy);
+        console.log('user busy in callDisconnect---------', user.isBusy);
       }
     }
   });
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++ Socket Disconnection +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  socket.on("disconnect", async () => {
+  socket.on('disconnect', async () => {
     // ################### Global Socket DisConnect ################
-    console.log("+++++++++ globalRoom Disconnect +++++++++", globalRoom);
+    console.log('+++++++++ globalRoom Disconnect +++++++++', globalRoom);
 
     //host Is Offline
     if (globalRoom) {
       console.log(
-        "check In globalRoom Disconnect +++++++++++++++++++++",
+        'check In globalRoom Disconnect +++++++++++++++++++++',
         globalRoom
       );
       const user = await User.findById(globalRoom);
@@ -1123,15 +1127,14 @@ io.on("connect", async (socket) => {
 
     // ################### Live User Socket DisConnect ################
 
-    console.log("+++++++++ LiveRoom Disconnect ++++++++++++", liveRoom);
-    console.log("+++++++ LiveUserRoom Disconnect ++++++++++", liveUserRoom);
-    console.log("+++++++ showUserRoom Disconnect ++++++++++", showUserRoom);
-
+    console.log('+++++++++ LiveRoom Disconnect ++++++++++++', liveRoom);
+    console.log('+++++++ LiveUserRoom Disconnect ++++++++++', liveUserRoom);
+    console.log('+++++++ showUserRoom Disconnect ++++++++++', showUserRoom);
 
     //Save Live Duration And End Time Save In History
     const liveStreamingHistory = await LiveStreamingHistory.findById(liveRoom);
     console.log(
-      "liveStreamingHistory-------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+      'liveStreamingHistory-------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',
       liveStreamingHistory
     );
 
@@ -1139,8 +1142,8 @@ io.on("connect", async (socket) => {
       const user = await User.findById(showUserRoom);
       if (user.isLive) {
         if (liveStreamingHistory) {
-          liveStreamingHistory.endTime = new Date().toLocaleString("en-US", {
-            timeZone: "Africa/Lagos",
+          liveStreamingHistory.endTime = new Date().toLocaleString('en-US', {
+            timeZone: 'Africa/Lagos',
           });
 
           liveStreamingHistory.duration =
@@ -1162,7 +1165,7 @@ io.on("connect", async (socket) => {
           if (liveUser) {
             await liveUser.deleteOne();
           }
-          console.log("-------- DELETE SUCCESS LIVE USER $$$$$$$$$$$$$$$$$$$");
+          console.log('-------- DELETE SUCCESS LIVE USER $$$$$$$$$$$$$$$$$$$');
         }
       }
     }
@@ -1179,7 +1182,7 @@ io.on("connect", async (socket) => {
         liveStreamingId: liveRoom,
       });
       console.log(
-        "------------------- liveView in liveUserRoom^^^^^^^^^^^^^",
+        '------------------- liveView in liveUserRoom^^^^^^^^^^^^^',
         liveView
       );
 
@@ -1187,13 +1190,13 @@ io.on("connect", async (socket) => {
         const liveStreamingHistory = await LiveStreamingHistory.findById(
           liveView.liveStreamingId
         );
-        console.log("LiveStreaming-----------", liveStreamingHistory);
+        console.log('LiveStreaming-----------', liveStreamingHistory);
 
         await LiveUser.updateOne(
-          { _id: liveStreamingHistory._id, "view.userId": liveUserRoom },
+          { _id: liveStreamingHistory._id, 'view.userId': liveUserRoom },
           {
             $set: {
-              "view.$.isAdd": false,
+              'view.$.isAdd': false,
             },
           }
         );
@@ -1201,24 +1204,24 @@ io.on("connect", async (socket) => {
       }
 
       const liveUser = await LiveUser.findOne({ userId: liveUserRoom });
-      console.log("-----------liveUser in liveUserRoom-----------", liveUser);
+      console.log('-----------liveUser in liveUserRoom-----------', liveUser);
 
       if (liveUser) {
         await liveUser.deleteOne();
       }
 
-      console.log("-------- DELETE SUCCESS liveUser $$$$$$$$$$$$$$$$$$$");
+      console.log('-------- DELETE SUCCESS liveUser $$$$$$$$$$$$$$$$$$$');
     }
 
     // ################### Video Call Socket DisConnect ################
 
     if ((videoCallRoom && !callRoom) || (callRoom && !videoCallRoom)) {
       console.log(
-        "+++++++++++++callRoom in socket disconnect+++++++++++++",
+        '+++++++++++++callRoom in socket disconnect+++++++++++++',
         callRoom
       );
       console.log(
-        "+++++++++++++videoCallRoom in socket disconnect+++++++++++++",
+        '+++++++++++++videoCallRoom in socket disconnect+++++++++++++',
         videoCallRoom
       );
       if (callRoom) {
@@ -1233,8 +1236,8 @@ io.on("connect", async (socket) => {
             { callUniqueId: mongoose.Types.ObjectId(query) },
             {
               $set: {
-                callEndTime: new Date().toLocaleString("en-US", {
-                  timeZone: "Africa/Lagos",
+                callEndTime: new Date().toLocaleString('en-US', {
+                  timeZone: 'Africa/Lagos',
                 }),
                 duration:
                   moment.utc(
@@ -1256,7 +1259,7 @@ io.on("connect", async (socket) => {
                   moment(new Date(history.callStartTime))
                 )
               )
-              .format("HH:mm:ss");
+              .format('HH:mm:ss');
             chat.callType = 1; // 1. receive
             chat.isRead = true;
             chat.messageType = 5;
@@ -1289,7 +1292,7 @@ io.on("connect", async (socket) => {
                   moment(new Date(history.callStartTime))
                 )
               )
-              .format("HH:mm:ss");
+              .format('HH:mm:ss');
             chat.callType = 1; // 1. receive
             chat.isRead = true;
             chat.messageType = 5;
@@ -1303,5 +1306,5 @@ io.on("connect", async (socket) => {
 
 //start the server
 server.listen(config.PORT, () => {
-  console.log("Magic happens on port " + config.PORT);
+  console.log('Magic happens on port ' + config.PORT);
 });
