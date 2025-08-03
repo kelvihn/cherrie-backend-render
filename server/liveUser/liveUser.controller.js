@@ -1,27 +1,28 @@
-const LiveUser = require("./liveUser.model");
-const LiveStreamingHistory = require("../liveStreamingHistory/liveStreamingHistory.model");
-const LiveView = require("../liveView/liveView.model");
-const Block = require("../block/block.model");
-const User = require("../user/user.model");
-const Setting = require("../setting/setting.model");
-const { RtcRole, RtcTokenBuilder } = require("agora-access-token");
-const config = require("../../config");
-var FCM = require("fcm-node");
+const LiveUser = require('./liveUser.model');
+const LiveStreamingHistory = require('../liveStreamingHistory/liveStreamingHistory.model');
+const LiveView = require('../liveView/liveView.model');
+const Block = require('../block/block.model');
+const User = require('../user/user.model');
+const Setting = require('../setting/setting.model');
+const { RtcRole, RtcTokenBuilder } = require('agora-access-token');
+const config = require('../../config');
+var FCM = require('fcm-node');
 var fcm = new FCM(config.SERVER_KEY);
+const cloudinaryService = require('../../util/CloudinaryService');
 
 exports.userIsLive = async (req, res) => {
   try {
     if (!req.body.userId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Detail...!" });
+        .json({ status: false, message: 'Invalid Detail...!' });
     }
 
     const user = await User.findById(req.body.userId);
     if (!user) {
       return res
         .status(200)
-        .json({ status: false, message: "User Is Not Exist...!" });
+        .json({ status: false, message: 'User Is Not Exist...!' });
     }
 
     const setting = await Setting.findOne({});
@@ -29,7 +30,7 @@ exports.userIsLive = async (req, res) => {
     if (!setting) {
       return res
         .status(200)
-        .json({ status: false, message: "Setting Is Not Exist...!" });
+        .json({ status: false, message: 'Setting Is Not Exist...!' });
     }
 
     const liveStreamingHistory = await new LiveStreamingHistory();
@@ -61,13 +62,15 @@ exports.userIsLive = async (req, res) => {
 
     await user.save();
 
+    const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+
     liveStreamingHistory.userId = user._id;
     liveStreamingHistory.coverImage = req.file
-      ? config.baseURL + req.file.path
+      ? cloudinaryUrl
       : user.profileImage;
     liveStreamingHistory.profileImage = user.profileImage;
-    liveStreamingHistory.startTime = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    liveStreamingHistory.startTime = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     await liveStreamingHistory.save();
@@ -77,22 +80,19 @@ exports.userIsLive = async (req, res) => {
     const newLiveUser = await new LiveUser();
 
     let liveUserStreaming;
+
     if (liveUser) {
       liveUser.liveStreamingId = liveStreamingHistory._id;
       liveUser.agoraUID = req.body.agoraUID;
       liveUser.diamond = user.diamond;
-      liveUser.coverImage = req.file
-        ? config.baseURL + req.file.path
-        : user.profileImage;
+      liveUser.coverImage = req.file ? cloudinaryUrl : user.profileImage;
 
       liveUserStreaming = await LiveUserFunction(liveUser, user);
     } else {
       newLiveUser.liveStreamingId = liveStreamingHistory._id;
       newLiveUser.agoraUID = req.body.agoraUID;
       newLiveUser.diamond = user.diamond;
-      newLiveUser.coverImage = req.file
-        ? config.baseURL + req.file.path
-        : user.profileImage;
+      newLiveUser.coverImage = req.file ? cloudinaryUrl : user.profileImage;
 
       liveUserStreaming = await LiveUserFunction(newLiveUser, user);
     }
@@ -108,12 +108,12 @@ exports.userIsLive = async (req, res) => {
     const liveUserStream = await LiveUser.aggregate([matchQuery]);
     const users = await User.find({
       $and: [{ isBlock: false }, { _id: { $ne: user._id } }],
-    }).distinct("fcm_token");
+    }).distinct('fcm_token');
     const payload = {
       registration_ids: users,
       notification: {
         title: `${user.name} is live now`,
-        body: "click and watch now!!",
+        body: 'click and watch now!!',
         image: user.profileImage,
       },
       data: {
@@ -134,7 +134,7 @@ exports.userIsLive = async (req, res) => {
         view: liveUserStream.view,
         isBusy: user.isBusy,
 
-        type: "LIVE",
+        type: 'LIVE',
       },
     };
 
@@ -142,22 +142,22 @@ exports.userIsLive = async (req, res) => {
 
     await fcm.send(payload, function (err, response) {
       if (err) {
-        console.log("Something has gone wrong!!", err);
+        console.log('Something has gone wrong!!', err);
       } else {
-        console.log("Notification sent successfully:", response);
+        console.log('Notification sent successfully:', response);
       }
     });
 
     return res.status(200).json({
       status: true,
-      message: "Success!!",
+      message: 'Success!!',
       liveHost: liveUserStream[0],
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -183,16 +183,16 @@ exports.getLiveUserList = async (req, res) => {
     if (!req.query.loginUserId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const loginUser = await User.findById(req.query.loginUserId);
 
-    const array1 = await Block.find({ from: loginUser._id }).distinct("to");
-    const array2 = await Block.find({ to: loginUser._id }).distinct("from");
+    const array1 = await Block.find({ from: loginUser._id }).distinct('to');
+    const array2 = await Block.find({ to: loginUser._id }).distinct('from');
 
     const blockUser = [...array1, ...array2];
-    console.log("blockUser_________", blockUser);
+    console.log('blockUser_________', blockUser);
 
     const user = await LiveUser.aggregate([
       {
@@ -205,19 +205,19 @@ exports.getLiveUserList = async (req, res) => {
       },
       {
         $lookup: {
-          from: "liveViews",
-          as: "totalUser",
-          localField: "liveStreamingId",
-          foreignField: "liveStreamingId",
+          from: 'liveViews',
+          as: 'totalUser',
+          localField: 'liveStreamingId',
+          foreignField: 'liveStreamingId',
         },
       },
       {
         $lookup: {
-          from: "follows",
-          as: "friends",
+          from: 'follows',
+          as: 'friends',
           let: {
             fromId: loginUser._id,
-            toId: "$userId",
+            toId: '$userId',
           },
           pipeline: [
             {
@@ -226,14 +226,14 @@ exports.getLiveUserList = async (req, res) => {
                   $or: [
                     {
                       $and: [
-                        { $eq: ["$from", "$$fromId"] },
-                        { $eq: ["$to", "$$toId"] },
+                        { $eq: ['$from', '$$fromId'] },
+                        { $eq: ['$to', '$$toId'] },
                       ],
                     },
                     {
                       $and: [
-                        { $eq: ["$to", "$$fromId"] },
-                        { $eq: ["$from", "$$toId"] },
+                        { $eq: ['$to', '$$fromId'] },
+                        { $eq: ['$from', '$$toId'] },
                       ],
                     },
                   ],
@@ -246,7 +246,7 @@ exports.getLiveUserList = async (req, res) => {
       {
         $addFields: {
           isFake: false,
-          video: "",
+          video: '',
         },
       },
       {
@@ -266,8 +266,8 @@ exports.getLiveUserList = async (req, res) => {
           isFake: 1,
           video: 1,
           liveStreamingId: 1,
-          totalUser: { $size: "$totalUser" },
-          friends: { $first: "$friends" },
+          totalUser: { $size: '$totalUser' },
+          friends: { $first: '$friends' },
         },
       },
       {
@@ -291,13 +291,13 @@ exports.getLiveUserList = async (req, res) => {
           friends: {
             $switch: {
               branches: [
-                { case: { $eq: ["$friends.friends", true] }, then: "Friends" },
+                { case: { $eq: ['$friends.friends', true] }, then: 'Friends' },
                 {
-                  case: { $eq: ["$friends.friends", false] },
-                  then: "Following",
+                  case: { $eq: ['$friends.friends', false] },
+                  then: 'Following',
                 },
               ],
-              default: "Follow",
+              default: 'Follow',
             },
           },
         },
@@ -315,21 +315,21 @@ exports.getLiveUserList = async (req, res) => {
           totalUser: {
             $floor: { $add: [30, { $multiply: [{ $rand: {} }, 121] }] },
           },
-          friends: "Follow",
-          token: "",
-          channel: "",
-          liveStreamingId: "",
+          friends: 'Follow',
+          token: '',
+          channel: '',
+          liveStreamingId: '',
         },
       },
       {
         $project: {
           _id: 1,
-          userId: "$_id",
+          userId: '$_id',
           name: 1,
           country: 1,
           profileImage: 1,
           diamond: 1,
-          coverImage: "$profileImage",
+          coverImage: '$profileImage',
           token: 1,
           channel: 1,
           coin: 1,
@@ -345,7 +345,7 @@ exports.getLiveUserList = async (req, res) => {
     ]);
     return res.status(200).json({
       status: true,
-      message: "Success!!",
+      message: 'Success!!',
       user: [...user, ...fakeUserList],
     });
     // if (user.length === 0) {
@@ -365,7 +365,7 @@ exports.getLiveUserList = async (req, res) => {
     console.log(error);
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error!!",
+      error: error.message || 'Internal Server Error!!',
     });
   }
 };
@@ -375,7 +375,7 @@ exports.afterLiveHistory = async (req, res) => {
     if (!req.query.liveStreamingId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Detail...!" });
+        .json({ status: false, message: 'Invalid Detail...!' });
     }
     const liveStreaming = await LiveStreamingHistory.findById(
       req.query.liveStreamingId
@@ -383,14 +383,14 @@ exports.afterLiveHistory = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Success!!",
+      message: 'Success!!',
       liveStreaming,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error!!",
+      error: error.message || 'Internal Server Error!!',
     });
   }
 };

@@ -1,18 +1,19 @@
 // Required User Model
-const User = require("../user/user.model");
-const config = require("../../config");
-const History = require("../history/history.model");
-const Block = require("../block/block.model");
-const Post = require("../post/post.model");
-const { default: mongoose } = require("mongoose");
-const UserGift = require("../userGift/userGift.model");
-const Gift = require("../gift/gift.model");
-const Comment = require("../comment/comment.model");
-const Like = require("../like/like.model");
-const fs = require("fs");
+const User = require('../user/user.model');
+const config = require('../../config');
+const History = require('../history/history.model');
+const Block = require('../block/block.model');
+const Post = require('../post/post.model');
+const { default: mongoose } = require('mongoose');
+const UserGift = require('../userGift/userGift.model');
+const Gift = require('../gift/gift.model');
+const Comment = require('../comment/comment.model');
+const Like = require('../like/like.model');
+const fs = require('fs');
+const cloudinaryService = require('../../util/CloudinaryService');
 
 //moment
-const moment = require("moment");
+const moment = require('moment');
 
 exports.userCreate = async (req, res) => {
   try {
@@ -27,7 +28,7 @@ exports.userCreate = async (req, res) => {
     ) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details....!" });
+        .json({ status: false, message: 'Invalid Details....!' });
     }
 
     const user = await new User();
@@ -42,8 +43,8 @@ exports.userCreate = async (req, res) => {
     user.profileImage = config.baseURL + req.files.profileImage[0].path;
     user.video = config.baseURL + req.files.video[0].path;
 
-    const randomChars = "0123456789";
-    let uniqueId = "";
+    const randomChars = '0123456789';
+    let uniqueId = '';
     for (let i = 0; i < 8; i++) {
       uniqueId += randomChars.charAt(
         Math.floor(Math.random() * randomChars.length)
@@ -52,20 +53,20 @@ exports.userCreate = async (req, res) => {
     user.uniqueId = uniqueId;
 
     const dates = new Date();
-    user.date = moment(dates).format("YYYY-MM-DD, HH:mm:ss A");
+    user.date = moment(dates).format('YYYY-MM-DD, HH:mm:ss A');
 
     await user.save();
 
     return res.status(200).json({
       status: true,
-      message: "fakeUser Created by admin!!",
+      message: 'fakeUser Created by admin!!',
       user,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Internal Server Error" });
+      .json({ status: false, error: error.message || 'Internal Server Error' });
   }
 };
 
@@ -74,13 +75,13 @@ exports.updatefakeUser = async (req, res) => {
     if (!req.query.userId)
       return res
         .status(200)
-        .json({ status: false, message: "Oops ! Invalid details!!" });
+        .json({ status: false, message: 'Oops ! Invalid details!!' });
 
     const fakeUser = await User.findById(req.query.userId);
     if (!fakeUser)
       return res
         .status(200)
-        .json({ status: false, message: "fakeUser does not found!!" });
+        .json({ status: false, message: 'fakeUser does not found!!' });
 
     fakeUser.name = req.body.name ? req.body.name : fakeUser.name;
     fakeUser.email = req.body.email ? req.body.email : fakeUser.email;
@@ -92,43 +93,43 @@ exports.updatefakeUser = async (req, res) => {
     fakeUser.isFake = true;
 
     if (req.files.profileImage) {
-      console.log("profileImage updated______");
+      console.log('profileImage updated______');
 
       fakeUser.profileImage = config.baseURL + req.files?.profileImage[0].path;
     }
 
     if (req.files.video) {
-      console.log("video updated______");
+      console.log('video updated______');
 
-      const fakeUser_ = fakeUser.video.split("storage");
+      const fakeUser_ = fakeUser.video.split('storage');
 
       if (fakeUser_) {
-        if (fs.existsSync("storage" + fakeUser_[1])) {
-          fs.unlinkSync("storage" + fakeUser_[1]);
+        if (fs.existsSync('storage' + fakeUser_[1])) {
+          fs.unlinkSync('storage' + fakeUser_[1]);
         }
 
         fakeUser.video = config.baseURL + req.files.video[0].path;
       }
     } else {
-      console.log("video updated______");
+      console.log('video updated______');
 
       fakeUser.video = req.body.video;
     }
 
     const dates = new Date();
-    fakeUser.date = moment(dates).format("YYYY-MM-DD, HH:mm:ss A");
+    fakeUser.date = moment(dates).format('YYYY-MM-DD, HH:mm:ss A');
 
     await fakeUser.save();
 
     return res
       .status(200)
-      .json({ status: true, message: "fakeUser updated by admin!!", fakeUser });
+      .json({ status: true, message: 'fakeUser updated by admin!!', fakeUser });
   } catch (error) {
     if (req.files) deleteFile(req.files);
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -137,25 +138,25 @@ exports.deletefakeUser = async (req, res) => {
     if (!req.query.userId)
       return res
         .status(200)
-        .json({ status: false, message: "Oops ! Invalid details!!" });
+        .json({ status: false, message: 'Oops ! Invalid details!!' });
 
     const fakeUser = await User.findById(req.query.userId);
     if (!fakeUser)
       return res
         .status(200)
-        .json({ status: false, message: "User does not found!!" });
+        .json({ status: false, message: 'User does not found!!' });
 
-    const fakeUserVideo = fakeUser.video?.split("storage");
+    const fakeUserVideo = fakeUser.video?.split('storage');
     if (fakeUserVideo) {
-      if (fs.existsSync("storage" + fakeUserVideo[1])) {
-        fs.unlinkSync("storage" + fakeUserVideo[1]);
+      if (fs.existsSync('storage' + fakeUserVideo[1])) {
+        fs.unlinkSync('storage' + fakeUserVideo[1]);
       }
     }
 
-    const fakeUserProfileImage = fakeUser.profileImage?.split("storage");
+    const fakeUserProfileImage = fakeUser.profileImage?.split('storage');
     if (fakeUserProfileImage) {
-      if (fs.existsSync("storage" + fakeUserProfileImage[1])) {
-        fs.unlinkSync("storage" + fakeUserProfileImage[1]);
+      if (fs.existsSync('storage' + fakeUserProfileImage[1])) {
+        fs.unlinkSync('storage' + fakeUserProfileImage[1]);
       }
     }
 
@@ -163,12 +164,12 @@ exports.deletefakeUser = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: true, message: "fakeUser deleted by admin!!" });
+      .json({ status: true, message: 'fakeUser deleted by admin!!' });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error",
+      error: error.message || 'Internal Server Error',
     });
   }
 };
@@ -178,7 +179,7 @@ exports.isLive = async (req, res) => {
     if (!req.query.userId) {
       return res
         .status(200)
-        .json({ status: false, massage: "UserId is requried!!" });
+        .json({ status: false, massage: 'UserId is requried!!' });
     }
 
     const user = await User.findById(req.query.userId);
@@ -186,7 +187,7 @@ exports.isLive = async (req, res) => {
     if (!user) {
       return res
         .status(200)
-        .json({ status: false, message: "User does not found!!" });
+        .json({ status: false, message: 'User does not found!!' });
     }
 
     user.isLive = !user.isLive;
@@ -195,14 +196,14 @@ exports.isLive = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Success!!",
+      message: 'Success!!',
       user,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error!!",
+      error: error.message || 'Internal Server Error!!',
     });
   }
 };
@@ -212,38 +213,40 @@ exports.addFakePost = async (req, res) => {
     if (!req.body.userId || !req.file.path) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const userId = await User.findById(req.body.userId);
     if (!userId) {
       return res
         .status(200)
-        .json({ status: false, message: "User does not exists !" });
+        .json({ status: false, message: 'User does not exists !' });
     }
 
     const post = await new Post();
 
+    const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+
     post.userId = userId;
     post.isFake = true;
     post.description = req.body.description;
-    post.postImage = config.baseURL + req.file.path;
-    post.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    post.postImage = cloudinaryUrl;
+    post.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     await post.save();
 
     return res.status(200).json({
       status: true,
-      message: "Create fakePost SUccessfully!!",
+      message: 'Create fakePost SUccessfully!!',
       post,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -252,43 +255,44 @@ exports.userFakeUpdatePost = async (req, res) => {
     if (!req.query.postId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
-    const post = await Post.findById(req.query.postId).populate("userId");
+    const post = await Post.findById(req.query.postId).populate('userId');
     if (!post) {
       return res
         .status(200)
-        .json({ status: false, message: "post does not found!!" });
+        .json({ status: false, message: 'post does not found!!' });
     }
 
     post.description = req.body.description
       ? req.body.description
       : post.description;
     post.isFake = true;
-    post.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    post.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     if (req.file) {
       if (fs.existsSync(post.postImage)) {
         fs.unlinkSync(post.postImage);
       }
-      post.postImage = config.baseURL + req.file.path;
+      const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+      post.postImage = cloudinaryUrl;
     }
-    
+
     await post.save();
 
     return res.status(200).json({
       status: true,
-      message: "Post Update Successfully",
+      message: 'Post Update Successfully',
       post,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       status: false,
-      message: error.message || "Internal Sever Error",
+      message: error.message || 'Internal Sever Error',
     });
   }
 };
@@ -297,18 +301,18 @@ exports.userFakePost = async (req, res) => {
   try {
     const fakePost = await Post.find({ isFake: true })
       .sort({ createdAt: -1 })
-      .populate("userId");
+      .populate('userId');
 
     return res.status(200).json({
       status: true,
-      message: "Post Get Successfully",
+      message: 'Post Get Successfully',
       fakePost,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, message: error.message || "Sever Error" });
+      .json({ status: false, message: error.message || 'Sever Error' });
   }
 };
 
@@ -317,14 +321,14 @@ exports.userFakeDeletePost = async (req, res) => {
     if (!req.query.postId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const post = await Post.findById(req.query.postId);
     if (!post) {
       return res
         .status(200)
-        .json({ status: false, message: "Post Done Not Exist...!" });
+        .json({ status: false, message: 'Post Done Not Exist...!' });
     }
 
     if (req.file) {
@@ -337,13 +341,13 @@ exports.userFakeDeletePost = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Post Delete Successfully",
+      message: 'Post Delete Successfully',
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, message: error.message || "Sever Error" });
+      .json({ status: false, message: error.message || 'Sever Error' });
   }
 };
 
@@ -352,7 +356,7 @@ exports.fakeUserCutCoin = async (req, res) => {
     if (!req.query.senderId || !req.query.receiverId || !req.query.giftId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const sender = await User.findById(req.query.senderId);
@@ -360,13 +364,13 @@ exports.fakeUserCutCoin = async (req, res) => {
     if (!sender || !receiver) {
       return res
         .status(200)
-        .json({ status: false, message: "User Done Not Exist...!" });
+        .json({ status: false, message: 'User Done Not Exist...!' });
     }
     const gift = await Gift.findById(req.query.giftId);
     if (!gift) {
       return res
         .status(200)
-        .json({ status: false, message: "Gift Done Not Exist...!" });
+        .json({ status: false, message: 'Gift Done Not Exist...!' });
     }
 
     sender.coin -= parseInt(gift.coin);
@@ -384,8 +388,8 @@ exports.fakeUserCutCoin = async (req, res) => {
     userSpend.isIncome = false;
     userSpend.receiverId = receiver._id;
     userSpend.giftId = gift._id;
-    userSpend.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    userSpend.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     await userSpend.save();
@@ -399,20 +403,20 @@ exports.fakeUserCutCoin = async (req, res) => {
     userEarn.isIncome = true;
     userEarn.userId = sender._id;
     userEarn.giftId = gift._id;
-    userEarn.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    userEarn.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     await userEarn.save();
 
     return res.status(200).json({
       status: true,
-      message: "Gift Send Successfully......!",
+      message: 'Gift Send Successfully......!',
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Internal Server Error" });
+      .json({ status: false, error: error.message || 'Internal Server Error' });
   }
 };

@@ -1,30 +1,33 @@
-const Withdraw = require("./withdraw.model");
+const Withdraw = require('./withdraw.model');
 
-const { deleteFile } = require("../../util/deleteFile");
-const fs = require("fs");
+const { deleteFile } = require('../../util/deleteFile');
+const fs = require('fs');
+const cloudinaryService = require('../../util/CloudinaryService');
 
 //Create Withdraw
 exports.store = async (req, res) => {
-  console.log("====== body =====", req.body);
-  console.log("==== file =======", req.file);
+  console.log('====== body =====', req.body);
+  console.log('==== file =======', req.file);
   try {
     if (!req.file || !req.body.name || !req.body.details) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const withdraw = new Withdraw();
 
+    const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+
     withdraw.name = req.body.name;
     withdraw.details = req.body.details;
-    withdraw.image = req.file.path;
+    withdraw.image = cloudinaryUrl;
 
     await withdraw.save();
 
     return res.status(200).json({
       status: true,
-      message: "Method Create Successfully..!",
+      message: 'Method Create Successfully..!',
       withdraw,
     });
   } catch (error) {
@@ -32,7 +35,7 @@ exports.store = async (req, res) => {
     deleteFile(req.file);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -42,7 +45,7 @@ exports.update = async (req, res) => {
     if (!req.query.withdrawId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const withdraw = await Withdraw.findById(req.query.withdrawId);
@@ -51,14 +54,15 @@ exports.update = async (req, res) => {
       deleteFile(req.file);
       return res
         .status(200)
-        .json({ status: false, message: "withdraw does not exist!!" });
+        .json({ status: false, message: 'withdraw does not exist!!' });
     }
 
     if (req.file) {
       if (fs.existsSync(withdraw.image)) {
         fs.unlinkSync(withdraw.image);
       }
-      withdraw.image = req.file.path;
+      const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+      withdraw.image = cloudinaryUrl;
     }
     withdraw.name = req.body.name;
     withdraw.details = req.body.details;
@@ -67,7 +71,7 @@ exports.update = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Method Updated Successfully..!",
+      message: 'Method Updated Successfully..!',
       withdraw,
     });
   } catch (error) {
@@ -75,7 +79,7 @@ exports.update = async (req, res) => {
     deleteFile(req.file);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -84,7 +88,7 @@ exports.delete = async (req, res) => {
   if (!req.query.withdrawId) {
     return res
       .status(200)
-      .json({ status: false, message: "Oops ! Invalid Details!!" });
+      .json({ status: false, message: 'Oops ! Invalid Details!!' });
   }
 
   const withdraw = await Withdraw.findById(req.query.withdrawId);
@@ -92,7 +96,7 @@ exports.delete = async (req, res) => {
   if (!withdraw) {
     return res
       .status(200)
-      .json({ status: false, message: "withdraw does not exist!!" });
+      .json({ status: false, message: 'withdraw does not exist!!' });
   }
 
   if (fs.existsSync(withdraw.image)) {
@@ -101,7 +105,7 @@ exports.delete = async (req, res) => {
 
   await withdraw.deleteOne();
 
-  return res.status(200).json({ status: true, message: "Success!!" });
+  return res.status(200).json({ status: true, message: 'Success!!' });
 };
 
 //Get Withdraw
@@ -111,12 +115,12 @@ exports.index = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: true, message: "Success!!", withdraw });
+      .json({ status: true, message: 'Success!!', withdraw });
   } catch (error) {
     console.log(error);
     deleteFile(req.file);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error!!" });
+      .json({ status: false, error: error.message || 'Server Error!!' });
   }
 };

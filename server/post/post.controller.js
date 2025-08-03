@@ -1,15 +1,16 @@
-const Post = require("./post.model");
-const User = require("../user/user.model");
-const Like = require("../like/like.model");
-const Comment = require("../comment/comment.model");
-const Gift = require("../gift/gift.model");
-const Block = require("../block/block.model");
-const UserGift = require("../userGift/userGift.model");
-const Notification = require("../notification/notification.model");
-const { baseURL } = require("../../config");
+const Post = require('./post.model');
+const User = require('../user/user.model');
+const Like = require('../like/like.model');
+const Comment = require('../comment/comment.model');
+const Gift = require('../gift/gift.model');
+const Block = require('../block/block.model');
+const UserGift = require('../userGift/userGift.model');
+const Notification = require('../notification/notification.model');
+const { baseURL } = require('../../config');
+const cloudinaryService = require('../../util/CloudinaryService');
 
-const config = require("../../config");
-var FCM = require("fcm-node");
+const config = require('../../config');
+var FCM = require('fcm-node');
 var fcm = new FCM(config.SERVER_KEY);
 
 exports.addPost = async (req, res) => {
@@ -19,37 +20,39 @@ exports.addPost = async (req, res) => {
     if (!req.body.userId || !req.file.path) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const userId = await User.findById(req.body.userId);
     if (!userId) {
       return res
         .status(200)
-        .json({ status: false, message: "User does not exists !" });
+        .json({ status: false, message: 'User does not exists !' });
     }
 
     const post = await new Post();
 
+    const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+
     post.userId = req.body.userId;
     post.description = req.body.description;
-    post.postImage = baseURL + req.file.path;
-    post.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    post.postImage = cloudinaryUrl;
+    post.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     await post.save();
 
     return res.status(200).json({
       status: true,
-      message: "Post Successfully......!",
+      message: 'Post Successfully......!',
       post,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -58,7 +61,7 @@ exports.deletePost = async (req, res) => {
     if (!req.query.postId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
     const post = await Post.findById(req.query.postId);
     if (!post) {
@@ -74,13 +77,13 @@ exports.deletePost = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Delete Post......!",
+      message: 'Successfully Delete Post......!',
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -89,26 +92,26 @@ exports.showPost = async (req, res) => {
     if (!req.query.loginUser) {
       return res
         .status(200)
-        .json({ status: false, message: "OOps ! Invalid details!!" });
+        .json({ status: false, message: 'OOps ! Invalid details!!' });
     }
 
     var loginUser = await User.findOne({ _id: req.query.loginUser });
     if (!loginUser) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Login User Details" });
+        .json({ status: false, message: 'Invalid Login User Details' });
     }
 
-    const array1 = await Block.find({ from: loginUser._id }).distinct("to");
-    const array2 = await Block.find({ to: loginUser._id }).distinct("from");
+    const array1 = await Block.find({ from: loginUser._id }).distinct('to');
+    const array2 = await Block.find({ to: loginUser._id }).distinct('from');
 
     const blockUser = [...array1, ...array2];
-    console.log("blockUser------->", blockUser);
+    console.log('blockUser------->', blockUser);
 
     var matchQuery, matchFake;
     if (req.query.userId) {
       var userPost_ = await User.findById(req.query.userId);
-      console.log("---", userPost_);
+      console.log('---', userPost_);
       matchQuery = {
         $and: [
           { userId: { $eq: userPost_._id } },
@@ -142,46 +145,46 @@ exports.showPost = async (req, res) => {
       },
       {
         $lookup: {
-          from: "users",
-          as: "userId",
-          localField: "userId",
-          foreignField: "_id",
+          from: 'users',
+          as: 'userId',
+          localField: 'userId',
+          foreignField: '_id',
         },
       },
       {
         $unwind: {
-          path: "$userId",
+          path: '$userId',
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $lookup: {
-          from: "comments",
-          as: "comment",
-          localField: "_id",
-          foreignField: "postId",
+          from: 'comments',
+          as: 'comment',
+          localField: '_id',
+          foreignField: 'postId',
         },
       },
       {
         $lookup: {
-          from: "likes",
-          as: "userLike",
-          let: { postId: "$_id" },
+          from: 'likes',
+          as: 'userLike',
+          let: { postId: '$_id' },
           pipeline: [
             {
-              $match: { $expr: { $eq: ["$$postId", "$postId"] } },
+              $match: { $expr: { $eq: ['$$postId', '$postId'] } },
             },
             {
               $lookup: {
-                localField: "userId",
-                foreignField: "_id",
-                from: "users",
-                as: "userId",
+                localField: 'userId',
+                foreignField: '_id',
+                from: 'users',
+                as: 'userId',
               },
             },
             {
               $unwind: {
-                path: "$userId",
+                path: '$userId',
                 preserveNullAndEmptyArrays: false,
               },
             },
@@ -192,9 +195,9 @@ exports.showPost = async (req, res) => {
               $project: {
                 _id: 1,
                 postId: 1,
-                userId: "$userId._id",
-                name: "$userId.name",
-                profileImage: "$userId.profileImage",
+                userId: '$userId._id',
+                name: '$userId.name',
+                profileImage: '$userId.profileImage',
               },
             },
           ],
@@ -202,38 +205,38 @@ exports.showPost = async (req, res) => {
       },
       {
         $lookup: {
-          from: "usergifts",
-          as: "userGift",
-          let: { postId: "$_id" },
+          from: 'usergifts',
+          as: 'userGift',
+          let: { postId: '$_id' },
           pipeline: [
             {
-              $match: { $expr: { $eq: ["$$postId", "$postId"] } },
+              $match: { $expr: { $eq: ['$$postId', '$postId'] } },
             },
             {
               $lookup: {
-                localField: "userId",
-                foreignField: "_id",
-                from: "users",
-                as: "userId",
+                localField: 'userId',
+                foreignField: '_id',
+                from: 'users',
+                as: 'userId',
               },
             },
             {
               $unwind: {
-                path: "$userId",
+                path: '$userId',
                 preserveNullAndEmptyArrays: false,
               },
             },
             {
               $lookup: {
-                localField: "giftId",
-                foreignField: "_id",
-                from: "gifts",
-                as: "giftId",
+                localField: 'giftId',
+                foreignField: '_id',
+                from: 'gifts',
+                as: 'giftId',
               },
             },
             {
               $unwind: {
-                path: "$giftId",
+                path: '$giftId',
                 preserveNullAndEmptyArrays: false,
               },
             },
@@ -244,10 +247,10 @@ exports.showPost = async (req, res) => {
               $project: {
                 _id: 1,
                 postId: 1,
-                userId: "$userId._id",
-                name: "$userId.name",
-                profileImage: "$userId.profileImage",
-                gift: "$giftId.image",
+                userId: '$userId._id',
+                name: '$userId.name',
+                profileImage: '$userId.profileImage',
+                gift: '$giftId.image',
               },
             },
           ],
@@ -258,12 +261,12 @@ exports.showPost = async (req, res) => {
           isLike: {
             $size: {
               $filter: {
-                input: "$userLike",
+                input: '$userLike',
                 cond: {
                   $and: [
                     {
-                      $eq: ["$$this.postId", "$_id"],
-                      $eq: ["$$this.userId", loginUser._id],
+                      $eq: ['$$this.postId', '$_id'],
+                      $eq: ['$$this.userId', loginUser._id],
                     },
                   ],
                 },
@@ -278,17 +281,17 @@ exports.showPost = async (req, res) => {
           description: 1,
           date: 1,
           createdAt: 1,
-          userLike: { $slice: ["$userLike", 2] },
-          isLike: { $cond: [{ $eq: ["$isLike", 1] }, true, false] },
-          like: { $size: "$userLike" },
-          comment: { $size: "$comment" },
-          gift: { $size: "$userGift" },
-          userGift: { $slice: ["$userGift", 2] },
-          userId: "$userId._id",
-          name: "$userId.name",
-          email: "$userId.email",
-          profileImage: "$userId.profileImage",
-          isFake: "$userId.isFake",
+          userLike: { $slice: ['$userLike', 2] },
+          isLike: { $cond: [{ $eq: ['$isLike', 1] }, true, false] },
+          like: { $size: '$userLike' },
+          comment: { $size: '$comment' },
+          gift: { $size: '$userGift' },
+          userGift: { $slice: ['$userGift', 2] },
+          userId: '$userId._id',
+          name: '$userId.name',
+          email: '$userId.email',
+          profileImage: '$userId.profileImage',
+          isFake: '$userId.isFake',
         },
       },
     ]);
@@ -299,15 +302,15 @@ exports.showPost = async (req, res) => {
       },
       {
         $lookup: {
-          from: "users",
-          as: "userId",
-          localField: "userId",
-          foreignField: "_id",
+          from: 'users',
+          as: 'userId',
+          localField: 'userId',
+          foreignField: '_id',
         },
       },
       {
         $unwind: {
-          path: "$userId",
+          path: '$userId',
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -333,17 +336,17 @@ exports.showPost = async (req, res) => {
           comment: 1,
           gift: 1,
           userGift: 1,
-          userId: "$userId._id",
-          name: "$userId.name",
-          email: "$userId.email",
-          profileImage: "$userId.profileImage",
-          isFake: "$userId.isFake",
+          userId: '$userId._id',
+          name: '$userId.name',
+          email: '$userId.email',
+          profileImage: '$userId.profileImage',
+          isFake: '$userId.isFake',
         },
       },
     ]);
     return res.status(200).json({
       status: true,
-      message: "Successfully Post Show!!",
+      message: 'Successfully Post Show!!',
       userPost: [...userPost, ...fakeUserPost],
     });
 
@@ -364,7 +367,7 @@ exports.showPost = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -374,27 +377,27 @@ exports.getPostById = async (req, res) => {
     if (!req.query.loginUser || !req.query.postId) {
       return res
         .status(200)
-        .json({ status: false, message: "OOps ! Invalid details!!" });
+        .json({ status: false, message: 'OOps ! Invalid details!!' });
     }
 
     var loginUser = await User.findOne({ _id: req.query.loginUser });
     if (!loginUser) {
       return res
         .status(200)
-        .json({ status: false, message: "LoginUser does not found!!" });
+        .json({ status: false, message: 'LoginUser does not found!!' });
     }
 
     const post = await Post.findById(req.query.postId);
     if (!post)
       return res
         .status(200)
-        .json({ status: false, message: "No data found!!" });
+        .json({ status: false, message: 'No data found!!' });
 
-    const array1 = await Block.find({ from: loginUser._id }).distinct("to");
-    const array2 = await Block.find({ to: loginUser._id }).distinct("from");
+    const array1 = await Block.find({ from: loginUser._id }).distinct('to');
+    const array2 = await Block.find({ to: loginUser._id }).distinct('from');
 
     const blockUser = [...array1, ...array2];
-    console.log("blockUser------->", blockUser);
+    console.log('blockUser------->', blockUser);
 
     var matchQuery;
     if (req.query.userId) {
@@ -426,46 +429,46 @@ exports.getPostById = async (req, res) => {
       },
       {
         $lookup: {
-          from: "users",
-          as: "userId",
-          localField: "userId",
-          foreignField: "_id",
+          from: 'users',
+          as: 'userId',
+          localField: 'userId',
+          foreignField: '_id',
         },
       },
       {
         $unwind: {
-          path: "$userId",
+          path: '$userId',
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $lookup: {
-          from: "comments",
-          as: "comment",
-          localField: "_id",
-          foreignField: "postId",
+          from: 'comments',
+          as: 'comment',
+          localField: '_id',
+          foreignField: 'postId',
         },
       },
       {
         $lookup: {
-          from: "likes",
-          as: "userLike",
-          let: { postId: "$_id" },
+          from: 'likes',
+          as: 'userLike',
+          let: { postId: '$_id' },
           pipeline: [
             {
-              $match: { $expr: { $eq: ["$$postId", "$postId"] } },
+              $match: { $expr: { $eq: ['$$postId', '$postId'] } },
             },
             {
               $lookup: {
-                localField: "userId",
-                foreignField: "_id",
-                from: "users",
-                as: "userId",
+                localField: 'userId',
+                foreignField: '_id',
+                from: 'users',
+                as: 'userId',
               },
             },
             {
               $unwind: {
-                path: "$userId",
+                path: '$userId',
                 preserveNullAndEmptyArrays: false,
               },
             },
@@ -476,9 +479,9 @@ exports.getPostById = async (req, res) => {
               $project: {
                 _id: 1,
                 postId: 1,
-                userId: "$userId._id",
-                name: "$userId.name",
-                profileImage: "$userId.profileImage",
+                userId: '$userId._id',
+                name: '$userId.name',
+                profileImage: '$userId.profileImage',
               },
             },
           ],
@@ -486,38 +489,38 @@ exports.getPostById = async (req, res) => {
       },
       {
         $lookup: {
-          from: "usergifts",
-          as: "userGift",
-          let: { postId: "$_id" },
+          from: 'usergifts',
+          as: 'userGift',
+          let: { postId: '$_id' },
           pipeline: [
             {
-              $match: { $expr: { $eq: ["$$postId", "$postId"] } },
+              $match: { $expr: { $eq: ['$$postId', '$postId'] } },
             },
             {
               $lookup: {
-                localField: "userId",
-                foreignField: "_id",
-                from: "users",
-                as: "userId",
+                localField: 'userId',
+                foreignField: '_id',
+                from: 'users',
+                as: 'userId',
               },
             },
             {
               $unwind: {
-                path: "$userId",
+                path: '$userId',
                 preserveNullAndEmptyArrays: false,
               },
             },
             {
               $lookup: {
-                localField: "giftId",
-                foreignField: "_id",
-                from: "gifts",
-                as: "giftId",
+                localField: 'giftId',
+                foreignField: '_id',
+                from: 'gifts',
+                as: 'giftId',
               },
             },
             {
               $unwind: {
-                path: "$giftId",
+                path: '$giftId',
                 preserveNullAndEmptyArrays: false,
               },
             },
@@ -528,10 +531,10 @@ exports.getPostById = async (req, res) => {
               $project: {
                 _id: 1,
                 postId: 1,
-                userId: "$userId._id",
-                name: "$userId.name",
-                profileImage: "$userId.profileImage",
-                gift: "$giftId.image",
+                userId: '$userId._id',
+                name: '$userId.name',
+                profileImage: '$userId.profileImage',
+                gift: '$giftId.image',
               },
             },
           ],
@@ -542,12 +545,12 @@ exports.getPostById = async (req, res) => {
           isLike: {
             $size: {
               $filter: {
-                input: "$userLike",
+                input: '$userLike',
                 cond: {
                   $and: [
                     {
-                      $eq: ["$$this.postId", "$_id"],
-                      $eq: ["$$this.userId", loginUser._id],
+                      $eq: ['$$this.postId', '$_id'],
+                      $eq: ['$$this.userId', loginUser._id],
                     },
                   ],
                 },
@@ -562,29 +565,29 @@ exports.getPostById = async (req, res) => {
           description: 1,
           date: 1,
           createdAt: 1,
-          userLike: { $slice: ["$userLike", 2] },
-          isLike: { $cond: [{ $eq: ["$isLike", 1] }, true, false] },
-          like: { $size: "$userLike" },
-          comment: { $size: "$comment" },
-          gift: { $size: "$userGift" },
-          userGift: { $slice: ["$userGift", 2] },
-          userId: "$userId._id",
-          name: "$userId.name",
-          email: "$userId.email",
-          profileImage: "$userId.profileImage",
+          userLike: { $slice: ['$userLike', 2] },
+          isLike: { $cond: [{ $eq: ['$isLike', 1] }, true, false] },
+          like: { $size: '$userLike' },
+          comment: { $size: '$comment' },
+          gift: { $size: '$userGift' },
+          userGift: { $slice: ['$userGift', 2] },
+          userId: '$userId._id',
+          name: '$userId.name',
+          email: '$userId.email',
+          profileImage: '$userId.profileImage',
         },
       },
     ]);
 
     return res.status(200).json({
       status: true,
-      message: "get particular post Successfully!!",
+      message: 'get particular post Successfully!!',
       userPost,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Internal Server Error" });
+      .json({ status: false, error: error.message || 'Internal Server Error' });
   }
 };

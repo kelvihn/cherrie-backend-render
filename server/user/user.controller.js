@@ -1,21 +1,22 @@
 // Required User Model
-const User = require("./user.model");
-const config = require("../../config");
-const History = require("../history/history.model");
-const Block = require("../block/block.model");
-const Post = require("../post/post.model");
-const { default: mongoose } = require("mongoose");
-const UserGift = require("../userGift/userGift.model");
-const Comment = require("../comment/comment.model");
-const Like = require("../like/like.model");
+const User = require('./user.model');
+const config = require('../../config');
+const History = require('../history/history.model');
+const Block = require('../block/block.model');
+const Post = require('../post/post.model');
+const { default: mongoose } = require('mongoose');
+const UserGift = require('../userGift/userGift.model');
+const Comment = require('../comment/comment.model');
+const Like = require('../like/like.model');
+const cloudinaryService = require('../../util/CloudinaryService');
 
 //moment
-const moment = require("moment");
+const moment = require('moment');
 
 // [App]
 exports.userLogin = async (req, res) => {
   try {
-    console.log("req.body in google login", req.body);
+    console.log('req.body in google login', req.body);
     if (
       !req.body.identity ||
       req.body.loginType === undefined ||
@@ -24,14 +25,14 @@ exports.userLogin = async (req, res) => {
     ) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details....!" });
+        .json({ status: false, message: 'Invalid Details....!' });
     }
     var user;
     if (req.body.loginType == 0) {
       const identity = await User.findOne({
-        $and: [{ identity: req.body.identity }, { email: "" }],
+        $and: [{ identity: req.body.identity }, { email: '' }],
       });
-      console.log("-----", identity);
+      console.log('-----', identity);
       if (identity?.loginType == 0) {
         user = identity;
       }
@@ -39,7 +40,7 @@ exports.userLogin = async (req, res) => {
       if (!req.body.email) {
         return res
           .status(200)
-          .json({ status: false, message: "Email Is Required....!" });
+          .json({ status: false, message: 'Email Is Required....!' });
       }
 
       const identity = await User.findOne({ identity: req.body.identity });
@@ -50,7 +51,7 @@ exports.userLogin = async (req, res) => {
 
       if (email) {
         user = email;
-      } else if (identity?.email == "") {
+      } else if (identity?.email == '') {
         user = identity;
       } else if (both) {
         user = both;
@@ -58,20 +59,20 @@ exports.userLogin = async (req, res) => {
     }
 
     if (user) {
-      console.log("----", user);
+      console.log('----', user);
 
       const user_ = await userFunction(user, req);
 
       return res.status(200).json({
         status: true,
-        message: "Login Successful !",
+        message: 'Login Successful !',
         user: user_,
       });
     } else {
       const newUser = new User();
 
-      const randomChars = "0123456789";
-      let uniqueId = "";
+      const randomChars = '0123456789';
+      let uniqueId = '';
       for (let i = 0; i < 8; i++) {
         uniqueId += randomChars.charAt(
           Math.floor(Math.random() * randomChars.length)
@@ -79,12 +80,12 @@ exports.userLogin = async (req, res) => {
       }
       newUser.uniqueId = uniqueId;
       const dates = new Date();
-      newUser.date = moment(dates).format("YYYY-MM-DD, HH:mm:ss A");
+      newUser.date = moment(dates).format('YYYY-MM-DD, HH:mm:ss A');
       const user_ = await userFunction(newUser, req);
 
       return res.status(200).json({
         status: true,
-        message: "Signup Success!!",
+        message: 'Signup Success!!',
         user: user_,
       });
     }
@@ -92,7 +93,7 @@ exports.userLogin = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Internal Server Error" });
+      .json({ status: false, error: error.message || 'Internal Server Error' });
   }
 };
 // [App]
@@ -106,14 +107,14 @@ const userFunction = async (user, data_) => {
   user.fcm_token = data.fcm_token;
   user.loginType = data.loginType ? data.loginType : user.loginType;
   user.platformType = data.platformType ? data.platformType : user.platformType;
-  console.log("data gender in userFunction", data.gender);
-  console.log("user gender in userFunction", user.gender);
+  console.log('data gender in userFunction', data.gender);
+  console.log('user gender in userFunction', user.gender);
   user.email = data.email ? data.email : user.email;
   user.gender = data.gender
     ? data.gender.toLowerCase().trim()
     : !user.gender
-    ? "male"
-    : user.gender;
+      ? 'male'
+      : user.gender;
 
   user.mobileNumber = data.mobileNumber ? data.mobileNumber : user.mobileNumber;
 
@@ -121,20 +122,20 @@ const userFunction = async (user, data_) => {
     user.profileImage = file
       ? config.baseURL + file.path
       : data.profileImage
-      ? data.profileImage
-      : data.gender === "female"
-      ? `${config.baseURL}storage/female.png`
-      : `${config.baseURL}storage/male.png`;
+        ? data.profileImage
+        : data.gender === 'female'
+          ? `${config.baseURL}storage/female.png`
+          : `${config.baseURL}storage/male.png`;
   }
 
   if (data.loginType == 1) {
     user.profileImage = user.profileImage
       ? user.profileImage
       : data.profileImage
-      ? data.profileImage
-      : data.gender === "female"
-      ? `${config.baseURL}storage/female.png`
-      : `${config.baseURL}storage/male.png`;
+        ? data.profileImage
+        : data.gender === 'female'
+          ? `${config.baseURL}storage/female.png`
+          : `${config.baseURL}storage/male.png`;
   }
 
   user.age = data.age;
@@ -145,7 +146,7 @@ const userFunction = async (user, data_) => {
   user.dob = data.dob ? data.dob : user.dob;
   user.coin = data.coin ? data.coin : user.coin;
 
-  console.log("----", user);
+  console.log('----', user);
 
   await user.save();
 
@@ -159,7 +160,7 @@ exports.userProfile = async (req, res) => {
     if (!req.query.loginUserId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const loginUser = await User.findById(req.query.loginUserId);
@@ -168,18 +169,18 @@ exports.userProfile = async (req, res) => {
     if (!loginUser) {
       return res
         .status(200)
-        .json({ status: false, message: "Login user not exist" });
+        .json({ status: false, message: 'Login user not exist' });
     }
     if (!profileUser) {
       return res
         .status(200)
-        .json({ status: false, message: "profileUser user not exist" });
+        .json({ status: false, message: 'profileUser user not exist' });
     }
     // const loginUser = mongoose.Types.ObjectId(req.query.loginUserId);
     // const profileUser = mongoose.Types.ObjectId(req.query.profileUserId);
 
-    const array1 = await Block.find({ from: loginUser._id }).distinct("to");
-    const array2 = await Block.find({ to: loginUser._id }).distinct("from");
+    const array1 = await Block.find({ from: loginUser._id }).distinct('to');
+    const array2 = await Block.find({ to: loginUser._id }).distinct('from');
 
     const blockUser = [...array1, ...array2];
     console.log(blockUser);
@@ -190,14 +191,14 @@ exports.userProfile = async (req, res) => {
       },
       {
         $lookup: {
-          from: "posts",
-          as: "userPost",
+          from: 'posts',
+          as: 'userPost',
           let: { userId: profileUser._id },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $eq: ["$$userId", "$userId"],
+                  $eq: ['$$userId', '$userId'],
                 },
               },
             },
@@ -206,12 +207,12 @@ exports.userProfile = async (req, res) => {
             },
             {
               $lookup: {
-                from: "likes",
-                as: "userLike",
-                let: { postId: "$_id" },
+                from: 'likes',
+                as: 'userLike',
+                let: { postId: '$_id' },
                 pipeline: [
                   {
-                    $match: { $expr: { $eq: ["$$postId", "$postId"] } },
+                    $match: { $expr: { $eq: ['$$postId', '$postId'] } },
                   },
                 ],
               },
@@ -223,7 +224,7 @@ exports.userProfile = async (req, res) => {
                 userId: 1,
                 postImage: 1,
                 createdAt: 1,
-                like: { $size: "$userLike" },
+                like: { $size: '$userLike' },
               },
             },
           ],
@@ -231,8 +232,8 @@ exports.userProfile = async (req, res) => {
       },
       {
         $lookup: {
-          from: "follows",
-          as: "follow",
+          from: 'follows',
+          as: 'follow',
           let: {
             fromId: profileUser._id,
           },
@@ -241,17 +242,17 @@ exports.userProfile = async (req, res) => {
               $match: {
                 $expr: {
                   $or: [
-                    { $eq: ["$from", "$$fromId"] },
-                    { $eq: ["$to", "$$fromId"] },
+                    { $eq: ['$from', '$$fromId'] },
+                    { $eq: ['$to', '$$fromId'] },
                   ],
                 },
               },
             },
             {
               $lookup: {
-                from: "blocks",
-                as: "isBlock",
-                let: { from: "$from", to: "$to" },
+                from: 'blocks',
+                as: 'isBlock',
+                let: { from: '$from', to: '$to' },
                 pipeline: [
                   {
                     $match: {
@@ -259,14 +260,14 @@ exports.userProfile = async (req, res) => {
                         $or: [
                           {
                             $and: [
-                              { $eq: ["$$from", "$from"] },
-                              { $eq: ["$$to", "$to"] },
+                              { $eq: ['$$from', '$from'] },
+                              { $eq: ['$$to', '$to'] },
                             ],
                           },
                           {
                             $and: [
-                              { $eq: ["$$from", "$to"] },
-                              { $eq: ["$$to", "$from"] },
+                              { $eq: ['$$from', '$to'] },
+                              { $eq: ['$$to', '$from'] },
                             ],
                           },
                         ],
@@ -278,12 +279,12 @@ exports.userProfile = async (req, res) => {
             },
             {
               $addFields: {
-                block: { $size: "$isBlock" },
+                block: { $size: '$isBlock' },
               },
             },
             {
               $addFields: {
-                isBlock: { $cond: [{ $gte: ["$block", 1] }, true, false] },
+                isBlock: { $cond: [{ $gte: ['$block', 1] }, true, false] },
               },
             },
             {
@@ -294,8 +295,8 @@ exports.userProfile = async (req, res) => {
       },
       {
         $lookup: {
-          from: "follows",
-          as: "friends",
+          from: 'follows',
+          as: 'friends',
           let: {
             fromId: loginUser._id,
             toId: profileUser._id,
@@ -305,8 +306,8 @@ exports.userProfile = async (req, res) => {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$from", "$$fromId"] },
-                    { $eq: ["$to", "$$toId"] },
+                    { $eq: ['$from', '$$fromId'] },
+                    { $eq: ['$to', '$$toId'] },
                   ],
                 },
               },
@@ -316,7 +317,7 @@ exports.userProfile = async (req, res) => {
       },
       {
         $unwind: {
-          path: "$friends",
+          path: '$friends',
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -328,14 +329,14 @@ exports.userProfile = async (req, res) => {
           isFake: 1,
           platformType: 1,
           email: 1,
-          token: { $cond: [{ $eq: ["$token", null] }, "", "$token"] },
-          channel: { $cond: [{ $eq: ["$channel", null] }, "", "$channel"] },
+          token: { $cond: [{ $eq: ['$token', null] }, '', '$token'] },
+          channel: { $cond: [{ $eq: ['$channel', null] }, '', '$channel'] },
           mobileNumber: {
-            $cond: [{ $eq: ["$mobileNumber", null] }, "", "$mobileNumber"],
+            $cond: [{ $eq: ['$mobileNumber', null] }, '', '$mobileNumber'],
           },
           profileImage: 1,
           coverImage: {
-            $cond: [{ $eq: ["$coverImage", null] }, "", "$coverImage"],
+            $cond: [{ $eq: ['$coverImage', null] }, '', '$coverImage'],
           },
           dob: 1,
           diamond: 1,
@@ -354,14 +355,14 @@ exports.userProfile = async (req, res) => {
           userPost: 1,
           uniqueId: 1,
           // follow: 1,
-          totalLike: { $sum: "$userPost.like" },
-          TotalPost: { $size: "$userPost" },
+          totalLike: { $sum: '$userPost.like' },
+          TotalPost: { $size: '$userPost' },
           following: {
             $size: {
               $filter: {
-                input: "$follow",
+                input: '$follow',
                 cond: {
-                  $eq: ["$$this.from", profileUser._id],
+                  $eq: ['$$this.from', profileUser._id],
                 },
               },
             },
@@ -369,9 +370,9 @@ exports.userProfile = async (req, res) => {
           followers: {
             $size: {
               $filter: {
-                input: "$follow",
+                input: '$follow',
                 cond: {
-                  $eq: ["$$this.to", profileUser._id],
+                  $eq: ['$$this.to', profileUser._id],
                 },
               },
             },
@@ -379,13 +380,13 @@ exports.userProfile = async (req, res) => {
           friends: {
             $switch: {
               branches: [
-                { case: { $eq: ["$friends.friends", true] }, then: "Friends" },
+                { case: { $eq: ['$friends.friends', true] }, then: 'Friends' },
                 {
-                  case: { $eq: ["$friends.friends", false] },
-                  then: "Following",
+                  case: { $eq: ['$friends.friends', false] },
+                  then: 'Following',
                 },
               ],
-              default: "Follow",
+              default: 'Follow',
             },
           },
         },
@@ -394,14 +395,14 @@ exports.userProfile = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Profile Show......!",
+      message: 'Successfully Profile Show......!',
       userProfile: userProfile[0],
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Internal Server Error" });
+      .json({ status: false, error: error.message || 'Internal Server Error' });
   }
 };
 // [App]
@@ -410,14 +411,14 @@ exports.userProfileUpdate = async (req, res) => {
     if (!req.query.userId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const user = await User.findById(req.query.userId);
     if (!user) {
       return res
         .status(200)
-        .json({ status: false, message: "User Done Not Exist...!" });
+        .json({ status: false, message: 'User Done Not Exist...!' });
     }
 
     user.name = req.body.name ? req.body.name : user.name;
@@ -426,21 +427,22 @@ exports.userProfileUpdate = async (req, res) => {
     user.dob = req.body.dob ? req.body.dob : user.dob;
 
     if (req.file) {
-      user.profileImage = config.baseURL + req.file.path;
+      const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+      user.profileImage = cloudinaryUrl;
     }
 
     await user.save();
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Profile Show......!",
+      message: 'Successfully Profile Show......!',
       user,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Internal Server Error" });
+      .json({ status: false, error: error.message || 'Internal Server Error' });
   }
 };
 
@@ -449,20 +451,20 @@ exports.userGet = async (req, res) => {
   try {
     var userAll;
 
-    if (req.query.userType == "fake") {
+    if (req.query.userType == 'fake') {
       userAll = await User.find({ isFake: true }).sort({ createdAt: -1 });
-      
+
       return res.status(200).json({
         status: true,
-        message: "Users Get Successfully",
+        message: 'Users Get Successfully',
         userAll,
       });
     } else {
       const start = req.query.start ? parseInt(req.query.start) : 1;
       const limit = req.query.limit ? parseInt(req.query.limit) : 5;
 
-      console.log("---start---", start);
-      console.log("---limit---", limit);
+      console.log('---start---', start);
+      console.log('---limit---', limit);
 
       userAll = await User.aggregate([
         {
@@ -485,7 +487,7 @@ exports.userGet = async (req, res) => {
 
       return res.status(200).json({
         status: true,
-        message: "Users Get Successfully",
+        message: 'Users Get Successfully',
         userAll: userAll[0].user,
         totalUser: totalUser.length,
       });
@@ -494,7 +496,7 @@ exports.userGet = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, message: error.message || "Sever Error" });
+      .json({ status: false, message: error.message || 'Sever Error' });
   }
 };
 
@@ -504,14 +506,14 @@ exports.userProfileAdmin = async (req, res) => {
     if (!req.query.userId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
     const profileUser = await User.findById(req.query.userId);
 
     if (!profileUser) {
       return res
         .status(200)
-        .json({ status: false, message: "User Dose Not Exist" });
+        .json({ status: false, message: 'User Dose Not Exist' });
     }
 
     var matchQuery;
@@ -522,14 +524,14 @@ exports.userProfileAdmin = async (req, res) => {
       },
       {
         $lookup: {
-          from: "posts",
-          as: "userPost",
+          from: 'posts',
+          as: 'userPost',
           let: { userId: profileUser._id },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $eq: ["$$userId", "$userId"],
+                  $eq: ['$$userId', '$userId'],
                 },
               },
             },
@@ -538,26 +540,26 @@ exports.userProfileAdmin = async (req, res) => {
             },
             {
               $lookup: {
-                from: "likes",
-                as: "userLike",
-                localField: "_id",
-                foreignField: "postId",
+                from: 'likes',
+                as: 'userLike',
+                localField: '_id',
+                foreignField: 'postId',
               },
             },
             {
               $lookup: {
-                from: "comments",
-                as: "comment",
-                localField: "_id",
-                foreignField: "postId",
+                from: 'comments',
+                as: 'comment',
+                localField: '_id',
+                foreignField: 'postId',
               },
             },
             {
               $lookup: {
-                from: "usergifts",
-                as: "gift",
-                localField: "_id",
-                foreignField: "postId",
+                from: 'usergifts',
+                as: 'gift',
+                localField: '_id',
+                foreignField: 'postId',
               },
             },
             {
@@ -567,9 +569,9 @@ exports.userProfileAdmin = async (req, res) => {
                 userId: 1,
                 postImage: 1,
                 createdAt: 1,
-                like: { $size: "$userLike" },
-                comment: { $size: "$comment" },
-                gift: { $size: "$gift" },
+                like: { $size: '$userLike' },
+                comment: { $size: '$comment' },
+                gift: { $size: '$gift' },
               },
             },
           ],
@@ -577,8 +579,8 @@ exports.userProfileAdmin = async (req, res) => {
       },
       {
         $lookup: {
-          from: "follows",
-          as: "follow",
+          from: 'follows',
+          as: 'follow',
           let: {
             fromId: profileUser._id,
           },
@@ -587,17 +589,17 @@ exports.userProfileAdmin = async (req, res) => {
               $match: {
                 $expr: {
                   $or: [
-                    { $eq: ["$from", "$$fromId"] },
-                    { $eq: ["$to", "$$fromId"] },
+                    { $eq: ['$from', '$$fromId'] },
+                    { $eq: ['$to', '$$fromId'] },
                   ],
                 },
               },
             },
             {
               $lookup: {
-                from: "blocks",
-                as: "isBlock",
-                let: { from: "$from", to: "$to" },
+                from: 'blocks',
+                as: 'isBlock',
+                let: { from: '$from', to: '$to' },
                 pipeline: [
                   {
                     $match: {
@@ -605,14 +607,14 @@ exports.userProfileAdmin = async (req, res) => {
                         $or: [
                           {
                             $and: [
-                              { $eq: ["$$from", "$from"] },
-                              { $eq: ["$$to", "$to"] },
+                              { $eq: ['$$from', '$from'] },
+                              { $eq: ['$$to', '$to'] },
                             ],
                           },
                           {
                             $and: [
-                              { $eq: ["$$from", "$to"] },
-                              { $eq: ["$$to", "$from"] },
+                              { $eq: ['$$from', '$to'] },
+                              { $eq: ['$$to', '$from'] },
                             ],
                           },
                         ],
@@ -624,12 +626,12 @@ exports.userProfileAdmin = async (req, res) => {
             },
             {
               $addFields: {
-                block: { $size: "$isBlock" },
+                block: { $size: '$isBlock' },
               },
             },
             {
               $addFields: {
-                isBlock: { $cond: [{ $gte: ["$block", 1] }, true, false] },
+                isBlock: { $cond: [{ $gte: ['$block', 1] }, true, false] },
               },
             },
             {
@@ -665,14 +667,14 @@ exports.userProfileAdmin = async (req, res) => {
           gender: 1,
           createdAt: 1,
           userPost: 1,
-          totalLike: { $sum: "$userPost.like" },
-          TotalPost: { $size: "$userPost" },
+          totalLike: { $sum: '$userPost.like' },
+          TotalPost: { $size: '$userPost' },
           following: {
             $size: {
               $filter: {
-                input: "$follow",
+                input: '$follow',
                 cond: {
-                  $eq: ["$$this.from", profileUser._id],
+                  $eq: ['$$this.from', profileUser._id],
                 },
               },
             },
@@ -680,9 +682,9 @@ exports.userProfileAdmin = async (req, res) => {
           followers: {
             $size: {
               $filter: {
-                input: "$follow",
+                input: '$follow',
                 cond: {
-                  $eq: ["$$this.to", profileUser._id],
+                  $eq: ['$$this.to', profileUser._id],
                 },
               },
             },
@@ -693,14 +695,14 @@ exports.userProfileAdmin = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Users Get Successfully",
+      message: 'Users Get Successfully',
       user: user[0],
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, message: error.message || "Sever Error" });
+      .json({ status: false, message: error.message || 'Sever Error' });
   }
 };
 
@@ -710,7 +712,7 @@ exports.isBlock = async (req, res) => {
     if (!req.query.userId) {
       return res
         .status(200)
-        .json({ status: false, massage: "UserId is requried!!" });
+        .json({ status: false, massage: 'UserId is requried!!' });
     }
 
     const user = await User.findById(req.query.userId);
@@ -718,7 +720,7 @@ exports.isBlock = async (req, res) => {
     if (!user) {
       return res
         .status(200)
-        .json({ status: false, message: "User does not found!!" });
+        .json({ status: false, message: 'User does not found!!' });
     }
 
     user.isBlock = !user.isBlock;
@@ -727,14 +729,14 @@ exports.isBlock = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Success!!",
+      message: 'Success!!',
       user,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error!!",
+      error: error.message || 'Internal Server Error!!',
     });
   }
 };
@@ -745,19 +747,19 @@ exports.addOrLessCoin = async (req, res) => {
     if (!req.body.userId)
       return res
         .status(200)
-        .json({ status: false, message: "Invalid details!!" });
+        .json({ status: false, message: 'Invalid details!!' });
 
     const user = await User.findById(req.body.userId);
 
     if (!user)
       return res
         .status(200)
-        .json({ status: false, message: "User does not found!!" });
+        .json({ status: false, message: 'User does not found!!' });
 
     if (req.body.coin && parseInt(req.body.coin) === user.coin)
       return res.status(200).json({
         status: true,
-        message: "Success!!",
+        message: 'Success!!',
         user,
       });
 
@@ -779,19 +781,19 @@ exports.addOrLessCoin = async (req, res) => {
     await user.save();
     history.userId = user._id;
     history.type = 3;
-    history.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    history.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
     await history.save();
     return res.status(200).json({
       status: true,
-      message: "Success!!",
+      message: 'Success!!',
       user,
     });
   } catch (error) {
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error!!",
+      error: error.message || 'Internal Server Error!!',
     });
   }
 };
@@ -802,7 +804,7 @@ exports.postDetails = async (req, res) => {
     if (!req.query.postId || !req.query.type) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
     const post = await Post.findById(req.query.postId);
     if (!post) {
@@ -811,11 +813,11 @@ exports.postDetails = async (req, res) => {
         .json({ status: false, message: "postId Doesn't Match" });
     }
     var Posts, array;
-    if (req.query.type == "like") {
+    if (req.query.type == 'like') {
       Posts = Like;
-    } else if (req.query.type == "comment") {
+    } else if (req.query.type == 'comment') {
       Posts = Comment;
-    } else if (req.query.type == "gift") {
+    } else if (req.query.type == 'gift') {
       Posts = UserGift;
     }
 
@@ -825,29 +827,29 @@ exports.postDetails = async (req, res) => {
       },
       {
         $lookup: {
-          from: "users",
-          as: "userId",
-          localField: "userId",
-          foreignField: "_id",
+          from: 'users',
+          as: 'userId',
+          localField: 'userId',
+          foreignField: '_id',
         },
       },
       {
         $unwind: {
-          path: "$userId",
+          path: '$userId',
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $lookup: {
-          from: "gifts",
-          as: "gift",
-          localField: "giftId",
-          foreignField: "_id",
+          from: 'gifts',
+          as: 'gift',
+          localField: 'giftId',
+          foreignField: '_id',
         },
       },
       {
         $unwind: {
-          path: "$gift",
+          path: '$gift',
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -859,27 +861,27 @@ exports.postDetails = async (req, res) => {
           _id: 1,
           postId: 1,
           comment: 1,
-          giftId: "$gift._id",
-          gift: "$gift.image",
+          giftId: '$gift._id',
+          gift: '$gift.image',
           createdAt: 1,
-          userId: "$userId._id",
-          profileImage: "$userId.profileImage",
-          name: "$userId.name",
-          bio: "$userId.bio",
+          userId: '$userId._id',
+          profileImage: '$userId.profileImage',
+          name: '$userId.name',
+          bio: '$userId.bio',
         },
       },
     ]);
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Comment......!",
+      message: 'Successfully Comment......!',
       posts,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -888,19 +890,19 @@ exports.updateUserDetails = async (req, res) => {
     const users = await User.find();
 
     const user = users.map((data) => {
-      data.date = moment(data.createdAt).format("YYYY-MM-DD, HH:mm:ss A");
+      data.date = moment(data.createdAt).format('YYYY-MM-DD, HH:mm:ss A');
       data.save();
     });
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Comment......!",
+      message: 'Successfully Comment......!',
       // user,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };

@@ -1,29 +1,31 @@
-const Admin = require("./admin.model");
+const Admin = require('./admin.model');
 
 //jwt token
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
 //config file
-const config = require("../../config");
+const config = require('../../config');
 
 //nodemailer
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 
 //fs
-const fs = require("fs");
+const fs = require('fs');
 
 //bcrypt
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs');
 
 //deleteFile
-const { deleteFile } = require("../../util/deleteFile");
-const { baseURL } = require("../../config");
+const { deleteFile } = require('../../util/deleteFile');
+const { baseURL } = require('../../config');
+
+const cloudinaryService = require('../../util/CloudinaryService');
 
 //create admin [Backend]
 exports.store = async (req, res) => {
   try {
-    console.log("body----", req.body);
-    console.log("file----", req.file);
+    console.log('body----', req.body);
+    console.log('file----', req.file);
 
     if (
       !req.body ||
@@ -34,27 +36,29 @@ exports.store = async (req, res) => {
     ) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid details!!" });
+        .json({ status: false, message: 'Invalid details!!' });
     }
 
     const admin = new Admin();
 
+    const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+
     admin.name = req.body.name;
     admin.email = req.body.email;
     admin.password = bcrypt.hashSync(req.body.password, 10);
-    admin.image = baseURL + req.file.path;
+    admin.image = cloudinaryUrl;
     admin.flag = req.body.flag ? req.body.flag : false;
 
     await admin.save(async (error, admin) => {
       if (error) {
         return res.status(200).json({
           status: false,
-          error: error.message || "Internal Server Error!!",
+          error: error.message || 'Internal Server Error!!',
         });
       } else {
         return res
           .status(200)
-          .json({ status: true, message: "Admin Created Successful!!", admin });
+          .json({ status: true, message: 'Admin Created Successful!!', admin });
       }
     });
   } catch (error) {
@@ -103,24 +107,24 @@ exports.login = async (req, res) => {
       if (admin.isActive) {
         return res.status(200).json({
           status: true,
-          message: "Admin Login Successfully!!",
+          message: 'Admin Login Successfully!!',
           token,
         });
       } else {
         return res
           .status(200)
-          .json({ status: false, message: "Admin does not exists!!" });
+          .json({ status: false, message: 'Admin does not exists!!' });
       }
     } else {
       return res
         .status(200)
-        .send({ status: false, message: "Oops ! Invalid details!!" });
+        .send({ status: false, message: 'Oops ! Invalid details!!' });
     }
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error!!",
+      error: error.message || 'Internal Server Error!!',
     });
   }
 };
@@ -133,15 +137,15 @@ exports.getAdminData = async (req, res) => {
     if (!admin) {
       return res
         .status(200)
-        .json({ status: false, message: "Admin does not Exist" });
+        .json({ status: false, message: 'Admin does not Exist' });
     }
 
-    return res.status(200).json({ status: true, message: "Success!!", admin });
+    return res.status(200).json({ status: true, message: 'Success!!', admin });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error!!",
+      error: error.message || 'Internal Server Error!!',
     });
   }
 };
@@ -163,14 +167,14 @@ exports.update = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Admin Updated Successfully!!",
+      message: 'Admin Updated Successfully!!',
       admin,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error!!" });
+      .json({ status: false, error: error.message || 'Server Error!!' });
   }
 };
 
@@ -183,26 +187,26 @@ exports.updateImage = async (req, res) => {
       deleteFile(req.file);
       return res
         .status(200)
-        .json({ status: false, message: "Admin does not Exist!" });
+        .json({ status: false, message: 'Admin does not Exist!' });
     }
 
     if (req.file) {
       if (fs.existsSync(admin.image)) {
         fs.unlinkSync(admin.image);
       }
-
-      admin.image = baseURL + req.file.path;
+      const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+      admin.image = cloudinaryUrl;
     }
 
     await admin.save();
 
-    return res.status(200).json({ status: true, message: "Success!!", admin });
+    return res.status(200).json({ status: true, message: 'Success!!', admin });
   } catch (error) {
     console.log(error);
     deleteFile(req.file);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error!!" });
+      .json({ status: false, error: error.message || 'Server Error!!' });
   }
 };
 
@@ -245,7 +249,7 @@ exports.updatePassword = async (req, res) => {
             else
               return res.status(200).json({
                 status: true,
-                message: "Password changed Successfully",
+                message: 'Password changed Successfully',
               });
           });
         }
@@ -253,42 +257,42 @@ exports.updatePassword = async (req, res) => {
     } else
       return res
         .status(200)
-        .json({ status: false, message: "Invalid details" });
+        .json({ status: false, message: 'Invalid details' });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
 //forgot password
 exports.forgotPassword = async (req, res) => {
   try {
-    console.log("----body", req.body);
+    console.log('----body', req.body);
 
     const admin = await Admin.findOne({ email: req.body.email });
 
-    console.log("----admin", admin);
+    console.log('----admin', admin);
 
     if (!admin) {
       return res
         .status(200)
-        .json({ status: false, message: "Email does not Exist!" });
+        .json({ status: false, message: 'Email does not Exist!' });
     }
 
     var transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: 'gmail',
       auth: {
         // user: config.EMAIL,
         // pass: config.PASSWORD,
-        user: "madhurmk40@gmail.com",
-        pass: "fdydknibeszaglxo",
+        user: 'madhurmk40@gmail.com',
+        pass: 'fdydknibeszaglxo',
       },
     });
 
-    var tab = "";
-    tab += "<!DOCTYPE html><html><head>";
+    var tab = '';
+    tab += '<!DOCTYPE html><html><head>';
     tab +=
       "<meta charset='utf-8'><meta http-equiv='x-ua-compatible' content='ie=edge'><meta name='viewport' content='width=device-width, initial-scale=1'>";
     tab += "<style type='text/css'>";
@@ -297,19 +301,19 @@ exports.forgotPassword = async (req, res) => {
     tab +=
       "@font-face {font-family: 'Source Sans Pro';font-style: normal;font-weight: 700;}}";
     tab +=
-      "body,table,td,a {-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }";
-    tab += "table,td {mso-table-rspace: 0pt;mso-table-lspace: 0pt;}";
-    tab += "img {-ms-interpolation-mode: bicubic;}";
+      'body,table,td,a {-ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }';
+    tab += 'table,td {mso-table-rspace: 0pt;mso-table-lspace: 0pt;}';
+    tab += 'img {-ms-interpolation-mode: bicubic;}';
     tab +=
-      "a[x-apple-data-detectors] {font-family: inherit !important;font-size: inherit !important;font-weight: inherit !important;line-height:inherit !important;color: inherit !important;text-decoration: none !important;}";
+      'a[x-apple-data-detectors] {font-family: inherit !important;font-size: inherit !important;font-weight: inherit !important;line-height:inherit !important;color: inherit !important;text-decoration: none !important;}';
     tab += "div[style*='margin: 16px 0;'] {margin: 0 !important;}";
     tab +=
-      "body {width: 100% !important;height: 100% !important;padding: 0 !important;margin: 0 !important;}";
-    tab += "table {border-collapse: collapse !important;}";
-    tab += "a {color: #1a82e2;}";
+      'body {width: 100% !important;height: 100% !important;padding: 0 !important;margin: 0 !important;}';
+    tab += 'table {border-collapse: collapse !important;}';
+    tab += 'a {color: #1a82e2;}';
     tab +=
-      "img {height: auto;line-height: 100%;text-decoration: none;border: 0;outline: none;}";
-    tab += "</style></head><body>";
+      'img {height: auto;line-height: 100%;text-decoration: none;border: 0;outline: none;}';
+    tab += '</style></head><body>';
     tab += "<table border='0' cellpadding='0' cellspacing='0' width='100%'>";
     tab +=
       "<tr><td align='center' bgcolor='#e9ecef'><table border='0' cellpadding='0' cellspacing='0' width='100%' style='max-width: 600px;'>";
@@ -332,16 +336,16 @@ exports.forgotPassword = async (req, res) => {
     tab +=
       "<a href='" +
       config.baseURL +
-      "changePassword/" +
+      'changePassword/' +
       admin._id +
       "' target='_blank' style='display: inline-block; padding: 16px 36px; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 4px;background: #FE9A16; box-shadow: -2px 10px 20px -1px #33cccc66;'>SUBMIT PASSWORD</a>";
     tab +=
-      "</td></tr></table></td></tr></table></td></tr></table></td></tr></table></body></html>";
+      '</td></tr></table></td></tr></table></td></tr></table></td></tr></table></body></html>';
 
     var mailOptions = {
-      from: "madhurmk40@gmail.com",
+      from: 'madhurmk40@gmail.com',
       to: req.body.email,
-      subject: "Sending Email from Hokoo",
+      subject: 'Sending Email from Hokoo',
       html: tab,
     };
 
@@ -351,7 +355,7 @@ exports.forgotPassword = async (req, res) => {
       } else {
         return res.status(200).json({
           status: true,
-          message: "Email send successfully",
+          message: 'Email send successfully',
         });
       }
     });
@@ -359,7 +363,7 @@ exports.forgotPassword = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -396,7 +400,7 @@ exports.setPassword = async (req, res, next) => {
                 else
                   res.status(200).json({
                     status: true,
-                    message: "Password Reset Successfully",
+                    message: 'Password Reset Successfully',
                   });
               });
             }
@@ -406,11 +410,11 @@ exports.setPassword = async (req, res, next) => {
     } else
       return res
         .status(200)
-        .send({ status: false, message: "Invalid details!" });
+        .send({ status: false, message: 'Invalid details!' });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "server error" });
+      .json({ status: false, error: error.message || 'server error' });
   }
 };
