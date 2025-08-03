@@ -19,7 +19,7 @@ const bcrypt = require('bcryptjs');
 const { deleteFile } = require('../../util/deleteFile');
 const { baseURL } = require('../../config');
 
-const cloudinaryService = require('../util/cloudinary');
+const cloudinaryService = require('../../util/cloudinary');
 
 //create admin [Backend]
 exports.store = async (req, res) => {
