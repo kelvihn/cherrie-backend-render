@@ -13,8 +13,10 @@ const { roundNumber } = require('./util/roundNumber');
 const moment = require('moment');
 
 //FCM node
-var FCM = require('fcm-node');
-var fcm = new FCM(config.SERVER_KEY);
+// var FCM = require('fcm-node');
+// var fcm = new FCM(config.SERVER_KEY);
+
+const admin = require('./util/firebase'); // import once, use everywhere
 
 //Socket.io Server
 const http = require('http');
@@ -514,32 +516,28 @@ io.on('connect', async (socket) => {
 
         if (receiverUser && !receiverUser.isBlock) {
           const payload = {
-            to: receiverUser.fcm_token,
             notification: {
-              body: chat.message,
               title: receiverUser.name,
+              body: chat.message,
             },
             data: {
-              senderProfileImage: senderUser.profileImage,
-              senderName: senderUser.name,
-              senderId: senderUser._id,
-              chatRoom: chatRoom,
+              senderProfileImage: senderUser.profileImage || '',
+              senderName: senderUser.name || '',
+              senderId: senderUser._id.toString(),
+              chatRoom: chatRoom.toString(),
               type: 'CHAT',
             },
+            token: receiverUser.fcm_token, // use `token` instead of `to`
           };
-          await fcm.send(payload, function (err, response) {
-            if (err) {
-              console.log('Something has gone wrong!', err);
-              console.log(
-                '((((((((((((((((((((((((((((((((((((((((((( FAIL CHAT ))))))))))))))))))))))))))))'
-              );
-            } else {
-              console.log('Message Send Successfully!', response);
-              console.log(
-                '((((((((((((((((((((((((((((((((((((((((((( PASS CHAT ))))))))))))))))))))))))))))'
-              );
-            }
-          });
+
+          try {
+            const response = await admin.messaging().send(payload);
+            console.log('Message Send Successfully!', response);
+            console.log('(((((((((((((((((( PASS CHAT ))))))))))))))))');
+          } catch (err) {
+            console.error('Something has gone wrong!', err);
+            console.error('(((((((((((((((((( FAIL CHAT ))))))))))))))))');
+          }
         }
 
         console.log('========= 1. Chat Emit =========', chat);
@@ -628,23 +626,23 @@ io.on('connect', async (socket) => {
 
         if (receiverUser && !receiverUser.isBlock) {
           const payload = {
-            to: receiverUser.fcm_token,
             notification: {
-              body: chat.message,
               title: senderUser.name,
+              body: chat.message,
             },
             data: {
-              data: {},
+              data: JSON.stringify({}), // must be stringified
               type: 'CHAT',
             },
+            token: receiverUser.fcm_token, // use 'token' instead of 'to'
           };
-          await fcm.send(payload, function (err, response) {
-            if (err) {
-              console.log('Something has gone wrong!', err);
-            } else {
-              console.log('Message Send Successfully!', response);
-            }
-          });
+
+          try {
+            const response = await admin.messaging().send(payload);
+            console.log('Message Send Successfully!', response);
+          } catch (err) {
+            console.error('Something has gone wrong!', err);
+          }
         }
 
         console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$', chat);
@@ -997,20 +995,19 @@ io.on('connect', async (socket) => {
         const receiver = await User.findById(data.receiverId);
 
         const payload = {
-          to: receiver.fcm_token,
           notification: {
-            body: 'Miscall you',
             title: sender.name,
+            body: 'Miscall you',
           },
+          token: receiver.fcm_token, // Note: use 'token' instead of 'to'
         };
 
-        await fcm.send(payload, function (err, response) {
-          if (response) {
-            console.log('notification sent successfully:', response);
-          } else {
-            console.log('Something has gone wrong!!!', err);
-          }
-        });
+        try {
+          const response = await admin.messaging().send(payload);
+          console.log('notification sent successfully:', response);
+        } catch (err) {
+          console.error('Something has gone wrong!!!', err);
+        }
       }
     }
   });

@@ -1,12 +1,14 @@
-const Follow = require("./follow.model");
-const User = require("../user/user.model");
-const Notification = require("../notification/notification.model");
-const Block = require("../block/block.model");
-const { default: mongoose } = require("mongoose");
+const Follow = require('./follow.model');
+const User = require('../user/user.model');
+const Notification = require('../notification/notification.model');
+const Block = require('../block/block.model');
+const { default: mongoose } = require('mongoose');
 //FCM node
-const config = require("../../config");
-var FCM = require("fcm-node");
-var fcm = new FCM(config.SERVER_KEY);
+// const config = require("../../config");
+// var FCM = require("fcm-node");
+// var fcm = new FCM(config.SERVER_KEY);
+
+const admin = require('../../util/firebase');
 
 exports.followRequest = async (req, res) => {
   console.log(req.query);
@@ -14,7 +16,7 @@ exports.followRequest = async (req, res) => {
     if (!req.query.userFromId || !req.query.userToId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const userFrom = await User.findById(req.query.userFromId);
@@ -22,7 +24,7 @@ exports.followRequest = async (req, res) => {
     if (!userTo || !userFrom) {
       return res
         .status(200)
-        .json({ status: false, message: "User does not exists !" });
+        .json({ status: false, message: 'User does not exists !' });
     }
 
     if (userFrom && userTo) {
@@ -46,7 +48,7 @@ exports.followRequest = async (req, res) => {
         }
         return res.status(200).send({
           status: true,
-          message: "UnFollow Successfully......! ",
+          message: 'UnFollow Successfully......! ',
           isFollow: false,
         });
       }
@@ -67,42 +69,40 @@ exports.followRequest = async (req, res) => {
 
       await followRequest.save();
 
-      console.log("++++++++++++++++++++++++++++++", userTo.fcm_token);
-
+      console.log('++++++++++++++++++++++++++++++', userTo.fcm_token);
       const payload = {
-        to: userTo.fcm_token,
         notification: {
-          body: `${userFrom.name} Follow You`,
           title: userFrom.name,
-          image: userFrom ? userFrom.profileImage : "",
+          body: `${userFrom.name} Follow You`,
+          image: userFrom?.profileImage || '',
         },
         data: {
-          data: {},
-          type: "ADMIN",
+          data: JSON.stringify({}), // Firebase Admin SDK requires all data values to be strings
+          type: 'ADMIN',
         },
+        token: userTo.fcm_token, // use 'token' instead of 'to'
       };
 
-      await fcm.send(payload, function (err, response) {
-        if (err) {
-          console.log("Something has gone wrong!", err);
-        } else {
-          console.log("Successfully sent with response: ", response);
-          console.log("###################################### ", response);
+      try {
+        const response = await admin.messaging().send(payload);
+        console.log('Successfully sent with response:', response);
+        console.log('###################################### ', response);
 
-          const notification = new Notification();
-          notification.receiverId = followRequest.to;
-          notification.type = 0;
-          notification.from = followRequest.from;
-          notification.to = followRequest.to;
-          notification.friends = followRequest.friends;
-          notification.userId = followRequest.from;
-          notification.save();
-        }
-      });
+        const notification = new Notification();
+        notification.receiverId = followRequest.to;
+        notification.type = 0;
+        notification.from = followRequest.from;
+        notification.to = followRequest.to;
+        notification.friends = followRequest.friends;
+        notification.userId = followRequest.from;
+        await notification.save();
+      } catch (err) {
+        console.error('Something has gone wrong!', err);
+      }
 
       return res.status(200).json({
         status: true,
-        message: "Follow Successfully......!",
+        message: 'Follow Successfully......!',
         isFollow: true,
       });
     }
@@ -110,7 +110,7 @@ exports.followRequest = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -119,22 +119,22 @@ exports.showFriends = async (req, res) => {
     if (!req.query.userId || !req.query.type) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
-    const array1 = await Block.find({ from: req.query.userId }).distinct("to");
-    const array2 = await Block.find({ to: req.query.userId }).distinct("from");
+    const array1 = await Block.find({ from: req.query.userId }).distinct('to');
+    const array2 = await Block.find({ to: req.query.userId }).distinct('from');
 
     const blockUser = [...array1, ...array2];
     console.log(blockUser);
 
     var matchQuery, lookUp;
-    if (req.query.type === "following") {
+    if (req.query.type === 'following') {
       matchQuery = { from: { $eq: mongoose.Types.ObjectId(req.query.userId) } };
-      lookUp = "to";
-    } else if (req.query.type === "followers") {
+      lookUp = 'to';
+    } else if (req.query.type === 'followers') {
       matchQuery = { to: { $eq: mongoose.Types.ObjectId(req.query.userId) } };
-      lookUp = "from";
+      lookUp = 'from';
     }
 
     const userFollow = await Follow.aggregate([
@@ -148,10 +148,10 @@ exports.showFriends = async (req, res) => {
       },
       {
         $lookup: {
-          from: "users",
+          from: 'users',
           as: lookUp,
           localField: lookUp,
-          foreignField: "_id",
+          foreignField: '_id',
         },
       },
       {
@@ -173,14 +173,14 @@ exports.showFriends = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Request Show......!",
+      message: 'Successfully Request Show......!',
       userFollow,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -190,35 +190,35 @@ exports.showList = async (req, res) => {
     if (!req.query.userId || !req.query.type) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
     var matchQuery, lookUp, projectQuery;
-    if (req.query.type === "following") {
+    if (req.query.type === 'following') {
       matchQuery = {
         $and: [
           { from: { $eq: mongoose.Types.ObjectId(req.query.userId) } },
           { isBlock: false },
         ],
       };
-      lookUp = "to";
+      lookUp = 'to';
       projectQuery = {
         $project: {
           _id: 1,
           friends: 1,
           from: 1,
-          to: "$to._id",
-          name: "$to.name",
-          bio: "$to.bio",
-          profileImage: "$to.profileImage",
-          isOnline: "$to.isOnline",
+          to: '$to._id',
+          name: '$to.name',
+          bio: '$to.bio',
+          profileImage: '$to.profileImage',
+          isOnline: '$to.isOnline',
           createdAt: 1,
-          post: { $size: "$post" },
+          post: { $size: '$post' },
           following: {
             $size: {
               $filter: {
-                input: "$follow",
+                input: '$follow',
                 cond: {
-                  $eq: ["$$this.from", `$${lookUp}._id`],
+                  $eq: ['$$this.from', `$${lookUp}._id`],
                 },
               },
             },
@@ -226,41 +226,41 @@ exports.showList = async (req, res) => {
           followers: {
             $size: {
               $filter: {
-                input: "$follow",
+                input: '$follow',
                 cond: {
-                  $eq: ["$$this.to", `$${lookUp}._id`],
+                  $eq: ['$$this.to', `$${lookUp}._id`],
                 },
               },
             },
           },
         },
       };
-    } else if (req.query.type === "followers") {
+    } else if (req.query.type === 'followers') {
       matchQuery = {
         $and: [
           { to: { $eq: mongoose.Types.ObjectId(req.query.userId) } },
           { isBlock: false },
         ],
       };
-      lookUp = "from";
+      lookUp = 'from';
       projectQuery = {
         $project: {
           _id: 1,
           friends: 1,
           to: 1,
-          from: "$from._id",
-          name: "$from.name",
-          bio: "$from.bio",
-          profileImage: "$from.profileImage",
-          isOnline: "$from.isOnline",
+          from: '$from._id',
+          name: '$from.name',
+          bio: '$from.bio',
+          profileImage: '$from.profileImage',
+          isOnline: '$from.isOnline',
           createdAt: 1,
-          post: { $size: "$post" },
+          post: { $size: '$post' },
           following: {
             $size: {
               $filter: {
-                input: "$follow",
+                input: '$follow',
                 cond: {
-                  $eq: ["$$this.from", `$${lookUp}._id`],
+                  $eq: ['$$this.from', `$${lookUp}._id`],
                 },
               },
             },
@@ -268,9 +268,9 @@ exports.showList = async (req, res) => {
           followers: {
             $size: {
               $filter: {
-                input: "$follow",
+                input: '$follow',
                 cond: {
-                  $eq: ["$$this.to", `$${lookUp}._id`],
+                  $eq: ['$$this.to', `$${lookUp}._id`],
                 },
               },
             },
@@ -281,9 +281,9 @@ exports.showList = async (req, res) => {
     const userFollow = await Follow.aggregate([
       {
         $lookup: {
-          from: "blocks",
-          as: "isBlock",
-          let: { from: "$from", to: "$to" },
+          from: 'blocks',
+          as: 'isBlock',
+          let: { from: '$from', to: '$to' },
           pipeline: [
             {
               $match: {
@@ -291,14 +291,14 @@ exports.showList = async (req, res) => {
                   $or: [
                     {
                       $and: [
-                        { $eq: ["$$from", "$from"] },
-                        { $eq: ["$$to", "$to"] },
+                        { $eq: ['$$from', '$from'] },
+                        { $eq: ['$$to', '$to'] },
                       ],
                     },
                     {
                       $and: [
-                        { $eq: ["$$from", "$to"] },
-                        { $eq: ["$$to", "$from"] },
+                        { $eq: ['$$from', '$to'] },
+                        { $eq: ['$$to', '$from'] },
                       ],
                     },
                   ],
@@ -310,12 +310,12 @@ exports.showList = async (req, res) => {
       },
       {
         $addFields: {
-          block: { $size: "$isBlock" },
+          block: { $size: '$isBlock' },
         },
       },
       {
         $addFields: {
-          isBlock: { $cond: [{ $gte: ["$block", 1] }, true, false] },
+          isBlock: { $cond: [{ $gte: ['$block', 1] }, true, false] },
         },
       },
       {
@@ -323,16 +323,16 @@ exports.showList = async (req, res) => {
       },
       {
         $lookup: {
-          from: "posts",
-          as: "post",
+          from: 'posts',
+          as: 'post',
           localField: lookUp,
-          foreignField: "userId",
+          foreignField: 'userId',
         },
       },
       {
         $lookup: {
-          from: "follows",
-          as: "follow",
+          from: 'follows',
+          as: 'follow',
           let: {
             fromId: `$${lookUp}`,
           },
@@ -341,17 +341,17 @@ exports.showList = async (req, res) => {
               $match: {
                 $expr: {
                   $or: [
-                    { $eq: ["$from", "$$fromId"] },
-                    { $eq: ["$to", "$$fromId"] },
+                    { $eq: ['$from', '$$fromId'] },
+                    { $eq: ['$to', '$$fromId'] },
                   ],
                 },
               },
             },
             {
               $lookup: {
-                from: "blocks",
-                as: "isBlock",
-                let: { from: "$from", to: "$to" },
+                from: 'blocks',
+                as: 'isBlock',
+                let: { from: '$from', to: '$to' },
                 pipeline: [
                   {
                     $match: {
@@ -359,14 +359,14 @@ exports.showList = async (req, res) => {
                         $or: [
                           {
                             $and: [
-                              { $eq: ["$$from", "$from"] },
-                              { $eq: ["$$to", "$to"] },
+                              { $eq: ['$$from', '$from'] },
+                              { $eq: ['$$to', '$to'] },
                             ],
                           },
                           {
                             $and: [
-                              { $eq: ["$$from", "$to"] },
-                              { $eq: ["$$to", "$from"] },
+                              { $eq: ['$$from', '$to'] },
+                              { $eq: ['$$to', '$from'] },
                             ],
                           },
                         ],
@@ -378,12 +378,12 @@ exports.showList = async (req, res) => {
             },
             {
               $addFields: {
-                block: { $size: "$isBlock" },
+                block: { $size: '$isBlock' },
               },
             },
             {
               $addFields: {
-                isBlock: { $cond: [{ $gte: ["$block", 1] }, true, false] },
+                isBlock: { $cond: [{ $gte: ['$block', 1] }, true, false] },
               },
             },
             {
@@ -394,10 +394,10 @@ exports.showList = async (req, res) => {
       },
       {
         $lookup: {
-          from: "users",
+          from: 'users',
           as: lookUp,
           localField: lookUp,
-          foreignField: "_id",
+          foreignField: '_id',
         },
       },
       {
@@ -412,13 +412,13 @@ exports.showList = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Request Show......!",
+      message: 'Successfully Request Show......!',
       userFollow,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };

@@ -9,10 +9,6 @@ const Notification = require('../notification/notification.model');
 const { baseURL } = require('../../config');
 const cloudinaryService = require('../../util/cloudinary');
 
-const config = require('../../config');
-var FCM = require('fcm-node');
-var fcm = new FCM(config.SERVER_KEY);
-
 exports.addPost = async (req, res) => {
   console.log(req.body);
   console.log(req.file);

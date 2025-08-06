@@ -5,9 +5,13 @@ const Block = require('../block/block.model');
 const User = require('../user/user.model');
 const Setting = require('../setting/setting.model');
 const { RtcRole, RtcTokenBuilder } = require('agora-access-token');
-const config = require('../../config');
-var FCM = require('fcm-node');
-var fcm = new FCM(config.SERVER_KEY);
+
+// const config = require('../../config');
+// var FCM = require('fcm-node');
+// var fcm = new FCM(config.SERVER_KEY);
+
+const admin = require('../../util/firebase');
+
 const cloudinaryService = require('../../util/cloudinary');
 
 exports.userIsLive = async (req, res) => {
@@ -113,47 +117,54 @@ exports.userIsLive = async (req, res) => {
     }
 
     const liveUserStream = await LiveUser.aggregate([matchQuery]);
-    const users = await User.find({
-      $and: [{ isBlock: false }, { _id: { $ne: user._id } }],
+
+    const fcmTokens = await User.find({
+      isBlock: false,
+      _id: { $ne: user._id },
+      fcm_token: { $exists: true, $ne: null },
     }).distinct('fcm_token');
-    const payload = {
-      registration_ids: users,
+
+    if (fcmTokens.length === 0) {
+      console.log('No FCM tokens found');
+      return;
+    }
+
+    // Construct message
+    const message = {
+      tokens: fcmTokens,
       notification: {
         title: `${user.name} is live now`,
-        body: 'click and watch now!!',
+        body: 'Click and watch now!',
         image: user.profileImage,
       },
       data: {
-        _id: user._id,
-        profileImage: user.profileImage,
-        isLive: user.isLive,
-        token: user.token,
-        diamond: user.diamond,
-        channel: user.channel,
-        level: user.level,
-        name: user.name,
-        age: user.age,
-        callCharge: user.callCharge,
-        isOnline: user.isOnline,
-        coin: user.coin,
-        liveStreamingId: liveStreamingHistory._id,
-        mongoId: liveUser ? liveUser._id : newLiveUser._id,
-        view: liveUserStream.view,
-        isBusy: user.isBusy,
-
+        _id: String(user._id),
+        profileImage: user.profileImage || '',
+        isLive: String(user.isLive),
+        token: user.token || '',
+        diamond: String(user.diamond),
+        channel: user.channel || '',
+        level: String(user.level),
+        name: user.name || '',
+        age: String(user.age),
+        callCharge: String(user.callCharge),
+        isOnline: String(user.isOnline),
+        coin: String(user.coin),
+        liveStreamingId: String(liveStreamingHistory._id),
+        mongoId: String(liveUser ? liveUser._id : newLiveUser._id),
+        view: String(liveUserStream.view),
+        isBusy: String(user.isBusy),
         type: 'LIVE',
       },
     };
 
-    //console.log("-------$$$$$ payload $$$$$--------", payload);
-
-    await fcm.send(payload, function (err, response) {
-      if (err) {
-        console.log('Something has gone wrong!!', err);
-      } else {
-        console.log('Notification sent successfully:', response);
-      }
-    });
+    // Send notification using Firebase Admin SDK
+    try {
+      const response = await admin.messaging().sendMulticast(message);
+      console.log('Notification sent successfully:', response);
+    } catch (err) {
+      console.error('Error sending notification:', err);
+    }
 
     return res.status(200).json({
       status: true,

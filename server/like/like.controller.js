@@ -1,21 +1,23 @@
-const Like = require("./like.model");
-const User = require("../user/user.model");
-const Post = require("../post/post.model");
-const { default: mongoose } = require("mongoose");
-const UserGift = require("../userGift/userGift.model");
-const Comment = require("../comment/comment.model");
-const Notification = require("../notification/notification.model");
+const Like = require('./like.model');
+const User = require('../user/user.model');
+const Post = require('../post/post.model');
+const { default: mongoose } = require('mongoose');
+const UserGift = require('../userGift/userGift.model');
+const Comment = require('../comment/comment.model');
+const Notification = require('../notification/notification.model');
 
-const config = require("../../config");
-var FCM = require("fcm-node");
-var fcm = new FCM(config.SERVER_KEY);
+// const config = require("../../config");
+// var FCM = require("fcm-node");
+// var fcm = new FCM(config.SERVER_KEY);
+
+const admin = require('../../util/firebase');
 
 exports.likePost = async (req, res) => {
   try {
     if (!req.query.postId || !req.query.userId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const user = await User.findById(req.query.userId);
@@ -37,7 +39,7 @@ exports.likePost = async (req, res) => {
       });
       return res.status(200).send({
         status: true,
-        message: "Dislike Successfully......! ",
+        message: 'Dislike Successfully......! ',
         like: false,
       });
     }
@@ -52,45 +54,44 @@ exports.likePost = async (req, res) => {
     const receiverId = await User.findById(post.userId);
 
     const payload = {
-      to: receiverId.fcm_token,
       notification: {
-        body: post.description,
         title: user.name,
-        image: post ? post.postImage : "",
+        body: post.description,
+        image: post?.postImage || '', // Only works if the URL is publicly accessible
       },
       data: {
-        data: {},
-        type: "ADMIN",
+        data: JSON.stringify({}), // Required: all data values must be strings
+        type: 'ADMIN',
       },
+      token: receiverId.fcm_token, // Use `token` instead of `to`
     };
 
-    await fcm.send(payload, function (err, response) {
-      if (err) {
-        console.log("Something has gone wrong!", err);
-      } else {
-        console.log("Successfully sent with response: ", response);
-        console.log("###################################### ", response);
+    try {
+      const response = await admin.messaging().send(payload);
+      console.log('Successfully sent with response:', response);
+      console.log('###################################### ', response);
 
-        const notification = new Notification();
-        notification.receiverId = receiverId._id;
-        notification.type = 1;
-        notification.userId = user._id;
-        notification.postImage = post.postImage;
-        notification.description = post.description;
-        notification.save();
-      }
-    });
+      const notification = new Notification();
+      notification.receiverId = receiverId._id;
+      notification.type = 1;
+      notification.userId = user._id;
+      notification.postImage = post.postImage;
+      notification.description = post.description;
+      await notification.save();
+    } catch (err) {
+      console.error('Something has gone wrong!', err);
+    }
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Like......!",
+      message: 'Successfully Like......!',
       like: true,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -100,7 +101,7 @@ exports.showPostLike = async (req, res) => {
     if (!req.query.postId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
     const postId = mongoose.Types.ObjectId(req.query.postId);
     const loginUserId = mongoose.Types.ObjectId(req.query.loginUserId);
@@ -110,19 +111,19 @@ exports.showPostLike = async (req, res) => {
       },
       {
         $lookup: {
-          from: "follows",
-          as: "friends",
+          from: 'follows',
+          as: 'friends',
           let: {
             fromId: loginUserId,
-            toId: "$userId",
+            toId: '$userId',
           },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$from", "$$fromId"] },
-                    { $eq: ["$to", "$$toId"] },
+                    { $eq: ['$from', '$$fromId'] },
+                    { $eq: ['$to', '$$toId'] },
                   ],
                 },
               },
@@ -132,21 +133,21 @@ exports.showPostLike = async (req, res) => {
       },
       {
         $unwind: {
-          path: "$friends",
+          path: '$friends',
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $lookup: {
-          localField: "userId",
-          foreignField: "_id",
-          from: "users",
-          as: "userId",
+          localField: 'userId',
+          foreignField: '_id',
+          from: 'users',
+          as: 'userId',
         },
       },
       {
         $unwind: {
-          path: "$userId",
+          path: '$userId',
           preserveNullAndEmptyArrays: false,
         },
       },
@@ -157,25 +158,25 @@ exports.showPostLike = async (req, res) => {
         $project: {
           _id: 1,
           postId: 1,
-          userId: "$userId._id",
-          name: "$userId.name",
-          profileImage: "$userId.profileImage",
+          userId: '$userId._id',
+          name: '$userId.name',
+          profileImage: '$userId.profileImage',
           friends: {
             $switch: {
               branches: [
-                { case: { $eq: ["$friends.friends", true] }, then: "Friends" },
+                { case: { $eq: ['$friends.friends', true] }, then: 'Friends' },
                 {
-                  case: { $eq: ["$friends.friends", false] },
-                  then: "Following",
+                  case: { $eq: ['$friends.friends', false] },
+                  then: 'Following',
                 },
                 {
                   case: {
-                    $eq: [loginUserId, "$userId._id"],
+                    $eq: [loginUserId, '$userId._id'],
                   },
-                  then: "me",
+                  then: 'me',
                 },
               ],
-              default: "Follow",
+              default: 'Follow',
             },
           },
         },
@@ -183,13 +184,13 @@ exports.showPostLike = async (req, res) => {
     ]);
     return res.status(200).json({
       status: true,
-      message: "Successfully Likes......!",
+      message: 'Successfully Likes......!',
       likes,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };

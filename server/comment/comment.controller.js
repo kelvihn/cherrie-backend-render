@@ -1,18 +1,20 @@
-const Post = require("../post/post.model");
-const User = require("../user/user.model");
-const Notification = require("../notification/notification.model");
-const Comment = require("./comment.model");
+const Post = require('../post/post.model');
+const User = require('../user/user.model');
+const Notification = require('../notification/notification.model');
+const Comment = require('./comment.model');
 
-const config = require("../../config");
-var FCM = require("fcm-node");
-var fcm = new FCM(config.SERVER_KEY);
+// const config = require("../../config");
+// var FCM = require("fcm-node");
+// var fcm = new FCM(config.SERVER_KEY);
+
+const admin = require('../../util/firebase');
 
 exports.comment = async (req, res) => {
   try {
     if (!req.query.postId || !req.query.userId || !req.body.comment) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
     const user = await User.findById(req.query.userId);
     const post = await Post.findById(req.query.postId);
@@ -27,8 +29,8 @@ exports.comment = async (req, res) => {
     comment.postId = post._id;
     comment.userId = user._id;
     comment.comment = req.body.comment;
-    comment.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    comment.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     await comment.save();
@@ -36,46 +38,45 @@ exports.comment = async (req, res) => {
     const receiverId = await User.findById(post.userId);
 
     const payload = {
-      to: receiverId.fcm_token,
       notification: {
-        body: post.description,
         title: user.name,
-        image: post ? post.postImage : "",
+        body: post.description,
+        image: post?.postImage || '', // image supported in `notification` payload
       },
       data: {
-        data: {},
-        type: "ADMIN",
+        data: JSON.stringify({}), // stringified object (required for Admin SDK)
+        type: 'ADMIN',
       },
+      token: receiverId.fcm_token, // note: 'token' instead of 'to'
     };
 
-    await fcm.send(payload, function (err, response) {
-      if (err) {
-        console.log("Something has gone wrong!", err);
-      } else {
-        console.log("Successfully sent with response: ", response);
-        console.log("###################################### ", response);
+    try {
+      const response = await admin.messaging().send(payload);
+      console.log('Successfully sent with response: ', response);
+      console.log('###################################### ', response);
 
-        const notification = new Notification();
-        notification.receiverId = receiverId._id;
-        notification.type = 3;
-        notification.userId = user._id;
-        notification.comment = comment.comment;
-        notification.postImage = post.postImage;
-        notification.description = post.description;
-        notification.save();
-      }
-    });
+      const notification = new Notification();
+      notification.receiverId = receiverId._id;
+      notification.type = 3;
+      notification.userId = user._id;
+      notification.comment = comment.comment;
+      notification.postImage = post.postImage;
+      notification.description = post.description;
+      await notification.save();
+    } catch (err) {
+      console.error('Something has gone wrong!', err);
+    }
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Comment......!",
+      message: 'Successfully Comment......!',
       comment,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -84,7 +85,7 @@ exports.showComment = async (req, res) => {
     if (!req.query.postId) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
     const post = await Post.findById(req.query.postId);
     if (!post) {
@@ -101,19 +102,19 @@ exports.showComment = async (req, res) => {
       },
       {
         $lookup: {
-          from: "users",
-          as: "userId",
-          let: { userId: "$userId" },
+          from: 'users',
+          as: 'userId',
+          let: { userId: '$userId' },
           pipeline: [
             {
-              $match: { $expr: { $eq: ["$$userId", "$_id"] } },
+              $match: { $expr: { $eq: ['$$userId', '$_id'] } },
             },
           ],
         },
       },
       {
         $unwind: {
-          path: "$userId",
+          path: '$userId',
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -127,22 +128,22 @@ exports.showComment = async (req, res) => {
           comment: 1,
           createdAt: 1,
           date: 1,
-          userId: "$userId._id",
-          profileImage: "$userId.profileImage",
-          name: "$userId.name",
+          userId: '$userId._id',
+          profileImage: '$userId.profileImage',
+          name: '$userId.name',
         },
       },
     ]);
 
     return res.status(200).json({
       status: true,
-      message: "Successfully Comment......!",
+      message: 'Successfully Comment......!',
       comment,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };

@@ -1,66 +1,68 @@
-const Chat = require("./chat.model");
-const ChatTopic = require("../chatTopic/chatTopic.model");
+const Chat = require('./chat.model');
+const ChatTopic = require('../chatTopic/chatTopic.model');
 
-const fs = require("fs");
+const fs = require('fs');
 
 //import model
-const User = require("../user/user.model");
-const Setting = require("../setting/setting.model");
+const User = require('../user/user.model');
+const Setting = require('../setting/setting.model');
 // const History = require("../history/history.model");
 
 // const History = require("../history/history.model");
 // const Notification = require("../notification/notification.model");
 
 //FCM node
-var FCM = require("fcm-node");
-var config = require("../../config");
-var fcm = new FCM(config.SERVER_KEY);
+// var FCM = require("fcm-node");
+// var config = require("../../config");
+// var fcm = new FCM(config.SERVER_KEY);
+
+const admin = require('../../util/firebase');
 
 //create chat [with image,video,audio]
 
 exports.store = async (req, res) => {
-  console.log("receiverUseer is  ", receiverUser);
+  console.log('receiverUseer is  ', receiverUser);
   try {
     if (!req.body.topicId || !req.body.messageType || !req.body.senderId)
       return res
         .status(200)
-        .json({ status: false, message: "Invalid details!!" });
+        .json({ status: false, message: 'Invalid details!!' });
 
     const chatTopic = await ChatTopic.findById(req.body.topicId).populate(
-      "senderId receiverId"
+      'senderId receiverId'
     );
 
     if (!chatTopic)
       return res
         .status(200)
-        .json({ status: false, message: "Topic not Exist!!" });
+        .json({ status: false, message: 'Topic not Exist!!' });
 
     // Send Image,Audio And Video Send In Chat
     const chat = new Chat();
 
     chat.senderId = req.body.senderId;
     chat.topicId = chatTopic._id;
-    chat.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    chat.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
-    console.log("-----", req.body);
-    console.log("-----", req.files);
+    console.log('-----', req.body);
+    console.log('-----', req.files);
 
     if (req.body.messageType == 2) {
       chat.messageType = 2;
-      chat.message = "📸 Image";
+      chat.message = '📸 Image';
       if (req.files.image) {
         chat.image = config.baseURL + req.files.image[0].path;
       }
     } else if (req.body.messageType == 3) {
       chat.messageType = 3;
-      chat.message = "📸 Video";
+      chat.message = '📸 Video';
       if (req.files.video) {
         chat.video = config.baseURL + req.files.video[0].path;
       }
     } else if (req.body.messageType == 4) {
       chat.messageType = 4;
-      chat.message = "🎤 Audio";
+      chat.message = '🎤 Audio';
       if (req.files.audio) {
         chat.audio = config.baseURL + req.files.audio[0].path;
       }
@@ -74,36 +76,37 @@ exports.store = async (req, res) => {
 
     res.status(200).json({
       status: true,
-      message: "Success!!",
+      message: 'Success!!',
       chat,
     });
 
     // notification related
     if (receiverUser && !receiverUser.isBlock) {
       const payload = {
-        to: receiverUser.fcm_token,
         notification: {
-          body: chat.message,
           title: senderUser.name,
+          body: chat.message,
         },
         data: {
-          data: {},
-          type: "CHAT",
+          // All values in `data` must be strings
+          data: JSON.stringify({}), // assuming you want to send an empty object or real data here
+          type: 'CHAT',
         },
+        token: receiverUser.fcm_token, // Replaces 'to' with 'token'
       };
-      await fcm.send(payload, function (err, response) {
-        if (err) {
-          console.log("Something has gone wrong!", err);
-        } else {
-          console.log("Successfully sent with response: ", response);
-        }
-      });
+
+      try {
+        const response = await admin.messaging().send(payload);
+        console.log('Successfully sent with response:', response);
+      } catch (err) {
+        console.error('Something has gone wrong!', err);
+      }
     }
   } catch (error) {
-    console.log("error is ===> ", error);
+    console.log('error is ===> ', error);
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error!!",
+      error: error.message || 'Internal Server Error!!',
     });
   }
 };
@@ -116,13 +119,13 @@ exports.getOldChat = async (req, res) => {
     // .limit(req.query.limit ? parseInt(req.query.limit) : 20);
 
     if (!chat)
-      return res.status(200).json({ status: false, message: "No data found!" });
+      return res.status(200).json({ status: false, message: 'No data found!' });
 
-    return res.status(200).json({ status: true, message: "Successful", chat });
+    return res.status(200).json({ status: true, message: 'Successful', chat });
   } catch (error) {
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -132,7 +135,7 @@ exports.deleteChat = async (req, res) => {
     if (!req.query.chatId) {
       return res
         .status(200)
-        .json({ status: false, message: "ChatId is required!!" });
+        .json({ status: false, message: 'ChatId is required!!' });
     }
 
     const chat = await Chat.findById(req.query.chatId);
@@ -140,12 +143,12 @@ exports.deleteChat = async (req, res) => {
     if (!chat) {
       return res
         .status(200)
-        .json({ status: false, message: "Chat does not exist!!" });
+        .json({ status: false, message: 'Chat does not exist!!' });
     }
 
     const chatTopic = await ChatTopic.findById(chat.topicId);
 
-    console.log("chatTopic------", chatTopic);
+    console.log('chatTopic------', chatTopic);
 
     if (chat.messageType === 0) {
       if (fs.existsSync(chat.image)) {
@@ -171,7 +174,7 @@ exports.deleteChat = async (req, res) => {
         createdAt: -1,
       });
 
-      console.log("newChat------", newChat);
+      console.log('newChat------', newChat);
 
       if (newChat) {
         chatTopic.chat = newChat._id;
@@ -180,11 +183,11 @@ exports.deleteChat = async (req, res) => {
       await chatTopic.save();
     }
 
-    return res.status(200).json({ status: true, message: "Success!!" });
+    return res.status(200).json({ status: true, message: 'Success!!' });
   } catch (error) {
     return res.status(500).json({
       status: false,
-      error: error.message || "Internal Server Error!!",
+      error: error.message || 'Internal Server Error!!',
     });
   }
 };

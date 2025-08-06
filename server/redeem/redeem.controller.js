@@ -1,12 +1,14 @@
-const Redeem = require("./redeem.model");
-const User = require("../user/user.model");
-const History = require("../history/history.model");
-const dayjs = require("dayjs");
+const Redeem = require('./redeem.model');
+const User = require('../user/user.model');
+const History = require('../history/history.model');
+const dayjs = require('dayjs');
 
 //FCM
-var FCM = require("fcm-node");
-var { SERVER_KEY } = require("../../config");
-var fcm = new FCM(SERVER_KEY);
+// var FCM = require("fcm-node");
+// var { SERVER_KEY } = require("../../config");
+// var fcm = new FCM(SERVER_KEY);
+
+const admin = require('../../util/firebase');
 
 // get redeem list [frontend]
 exports.index = async (req, res) => {
@@ -14,34 +16,34 @@ exports.index = async (req, res) => {
     if (!req.query.type)
       return res
         .status(200)
-        .json({ status: false, message: "Type is Required!" });
+        .json({ status: false, message: 'Type is Required!' });
 
     let redeem;
-    if (req.query.type.trim() === "pending") {
+    if (req.query.type.trim() === 'pending') {
       redeem = await Redeem.find({ status: 0 })
-        .populate("userId", "name profileImage country")
+        .populate('userId', 'name profileImage country')
         .sort({ createdAt: -1 });
     }
-    if (req.query.type.trim() === "solved") {
+    if (req.query.type.trim() === 'solved') {
       redeem = await Redeem.find({ status: 1 })
-        .populate("userId", "name profileImage country")
+        .populate('userId', 'name profileImage country')
         .sort({ createdAt: -1 });
     }
-    if (req.query.type.trim() === "decline") {
+    if (req.query.type.trim() === 'decline') {
       redeem = await Redeem.find({ status: 2 })
-        .populate("userId", "name profileImage country")
+        .populate('userId', 'name profileImage country')
         .sort({ createdAt: -1 });
     }
 
     if (!redeem)
-      return res.status(200).json({ status: false, message: "No data Found!" });
+      return res.status(200).json({ status: false, message: 'No data Found!' });
 
-    return res.status(200).json({ status: true, message: "Success!!", redeem });
+    return res.status(200).json({ status: true, message: 'Success!!', redeem });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -53,7 +55,7 @@ exports.userRedeem = async (req, res) => {
     if (!user)
       return res
         .status(200)
-        .json({ status: false, message: "user does not Exist!" });
+        .json({ status: false, message: 'user does not Exist!' });
 
     const redeem = await Redeem.aggregate([
       {
@@ -65,10 +67,10 @@ exports.userRedeem = async (req, res) => {
           status: {
             $switch: {
               branches: [
-                { case: { $eq: ["$status", 1] }, then: "Accepted" },
-                { case: { $eq: ["$status", 2] }, then: "Declined" },
+                { case: { $eq: ['$status', 1] }, then: 'Accepted' },
+                { case: { $eq: ['$status', 2] }, then: 'Declined' },
               ],
-              default: "Pending",
+              default: 'Pending',
             },
           },
           userId: 1,
@@ -88,37 +90,37 @@ exports.userRedeem = async (req, res) => {
     if (!redeem)
       return res
         .status(200)
-        .json({ status: false, message: "Data not Found!" });
+        .json({ status: false, message: 'Data not Found!' });
 
     let now = dayjs();
 
     const redeemList = redeem.map((data) => ({
       ...data,
       time:
-        now.diff(data.date, "minute") <= 60 &&
-        now.diff(data.date, "minute") >= 0
-          ? now.diff(data.date, "minute") + " minutes ago"
-          : now.diff(data.date, "hour") >= 24
-          ? dayjs(data.date).format("DD MMM, YYYY")
-          : now.diff(data.date, "hour") + " hour ago",
+        now.diff(data.date, 'minute') <= 60 &&
+        now.diff(data.date, 'minute') >= 0
+          ? now.diff(data.date, 'minute') + ' minutes ago'
+          : now.diff(data.date, 'hour') >= 24
+            ? dayjs(data.date).format('DD MMM, YYYY')
+            : now.diff(data.date, 'hour') + ' hour ago',
     }));
 
     return res.status(200).json({
       status: redeemList.length > 0 ? true : false,
-      message: redeemList.length > 0 ? "Success!" : "No Data Found",
+      message: redeemList.length > 0 ? 'Success!' : 'No Data Found',
       redeem: redeemList.length > 0 ? redeemList : [],
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
 // create redeem request
 exports.store = async (req, res) => {
-  console.log("%%%%%%%%%%%%%", req.body);
+  console.log('%%%%%%%%%%%%%', req.body);
   try {
     if (
       !req.body.userId ||
@@ -128,20 +130,20 @@ exports.store = async (req, res) => {
     )
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details!!" });
+        .json({ status: false, message: 'Invalid Details!!' });
 
     const user = await User.findById(req.body.userId);
 
     if (!user) {
       return res
         .status(200)
-        .json({ status: false, message: "user does not Exist!" });
+        .json({ status: false, message: 'user does not Exist!' });
     }
 
     if (req.body.diamond > user.diamond) {
       return res
         .status(200)
-        .json({ status: false, message: "Not Enough Diamond for CaseOut." });
+        .json({ status: false, message: 'Not Enough Diamond for CaseOut.' });
     }
     const redeem = new Redeem();
 
@@ -157,12 +159,12 @@ exports.store = async (req, res) => {
     user.withdrawalDiamond += parseInt(req.body.diamond);
     await user.save();
 
-    return res.status(200).json({ status: true, message: "Success!!" });
+    return res.status(200).json({ status: true, message: 'Success!!' });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
 
@@ -175,13 +177,17 @@ exports.update = async (req, res) => {
 
     let payload;
 
-    if (req.query.type === "accept") {
+    if (req.query.type === 'accept') {
       redeem.status = 1;
       if (user) {
         payload = {
-          to: user.fcm_token,
+          token: user.fcm_token, // not `to`
           notification: {
-            title: "Your redeem request has been accepted!",
+            title: 'Your redeem request is accepted!',
+            body: '', // Optional
+          },
+          data: {
+            // Optional custom data, must be strings
           },
         };
 
@@ -200,9 +206,13 @@ exports.update = async (req, res) => {
       redeem.status = 2;
       if (user) {
         payload = {
-          to: user.fcm_token,
+          token: user.fcm_token, // not `to`
           notification: {
-            title: "Your redeem request is declined!",
+            title: 'Your redeem request is declined!',
+            body: '', // Optional
+          },
+          data: {
+            // Optional custom data, must be strings
           },
         };
 
@@ -215,18 +225,18 @@ exports.update = async (req, res) => {
     await redeem.save();
 
     if (user && !user.isBlock) {
-      await fcm.send(payload, function (err, response) {
+      await admin.messaging().send(payload, function (err, response) {
         if (err) {
-          console.log("Something has gone wrong!", err);
+          console.log('Something has gone wrong!', err);
         }
       });
     }
 
-    return res.status(200).json({ status: true, message: "success", redeem });
+    return res.status(200).json({ status: true, message: 'success', redeem });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };

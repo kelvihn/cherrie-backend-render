@@ -3,10 +3,12 @@ const Notification = require('./notification.model');
 const cloudinaryService = require('../../util/cloudinary');
 
 //FCM node
-const config = require('../../config');
-var FCM = require('fcm-node');
-const { baseURL } = require('../../config');
-var fcm = new FCM(config.SERVER_KEY);
+// const config = require('../../config');
+// var FCM = require('fcm-node');
+// const { baseURL } = require('../../config');
+// var fcm = new FCM(config.SERVER_KEY);
+
+const admin = require('../../util/firebase');
 
 //add field in user model
 exports.updateFCM = async (req, res) => {
@@ -239,21 +241,21 @@ exports.sendNotification = async (req, res) => {
 
     const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
 
-    const payload = {
-      registration_ids: user,
-      notification: {
-        body: req.body.description,
-        title: req.body.title,
-        image: req.file ? cloudinaryUrl : '',
-      },
-      data: {
-        data: {},
-        type: 'ADMIN',
-      },
-    };
+    // const payload = {
+    //   registration_ids: user,
+    //   notification: {
+    //     body: req.body.description,
+    //     title: req.body.title,
+    //     image: req.file ? cloudinaryUrl : '',
+    //   },
+    //   data: {
+    //     data: {},
+    //     type: 'ADMIN',
+    //   },
+    // };
 
-    console.log('--------- req.body', req.body);
-    console.log('--------- req.file', req.file);
+    // console.log('--------- req.body', req.body);
+    // console.log('--------- req.file', req.file);
 
     await user_.map(async (data) => {
       const notification = new Notification();
@@ -268,21 +270,36 @@ exports.sendNotification = async (req, res) => {
       await notification.save();
     });
 
-    await fcm.send(payload, function (err, response) {
-      if (response) {
-        console.log('Successfully sent with response: ', response);
-        return res.status(200).json({
-          status: true,
-          message: 'Successfully sent message!!!',
-        });
-      } else {
-        console.log('Something has gone wrong!', err);
-        return res.status(200).json({
-          status: false,
-          message: 'Something has gone wrong!!',
-        });
-      }
-    });
+    const message = {
+      notification: {
+        title: req.body.title,
+        body: req.body.description,
+        image: req.file ? cloudinaryUrl : '',
+      },
+      data: {
+        type: 'ADMIN',
+        data: JSON.stringify({}), // custom payload
+      },
+      tokens, // use this with sendMulticast
+    };
+
+    try {
+      const response = await admin.messaging().sendMulticast(message);
+
+      console.log('Successfully sent with response:', response);
+
+      return res.status(200).json({
+        status: true,
+        message: 'Successfully sent message!!!',
+      });
+    } catch (err) {
+      console.error('Something has gone wrong!', err);
+
+      return res.status(200).json({
+        status: false,
+        message: 'Something has gone wrong!!',
+      });
+    }
   } catch (error) {
     console.log(error);
     return res.status(500).json({

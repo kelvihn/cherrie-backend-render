@@ -1,21 +1,23 @@
-const Like = require("../like/like.model");
-const History = require("../history/history.model");
-const User = require("../user/user.model");
-const Post = require("../post/post.model");
-const Gift = require("../gift/gift.model");
-const Setting = require("../setting/setting.model");
-const Notification = require("../notification/notification.model");
-const UserGift = require("./userGift.model");
-const { default: mongoose } = require("mongoose");
-const { roundNumber } = require("../../util/roundNumber");
+const Like = require('../like/like.model');
+const History = require('../history/history.model');
+const User = require('../user/user.model');
+const Post = require('../post/post.model');
+const Gift = require('../gift/gift.model');
+const Setting = require('../setting/setting.model');
+const Notification = require('../notification/notification.model');
+const UserGift = require('./userGift.model');
+const { default: mongoose } = require('mongoose');
+const { roundNumber } = require('../../util/roundNumber');
 
-const config = require("../../config");
-var FCM = require("fcm-node");
-var fcm = new FCM(config.SERVER_KEY);
+// const config = require('../../config');
+// var FCM = require('fcm-node');
+// var fcm = new FCM(config.SERVER_KEY);
+
+const admin = require('../../util/firebase');
 
 exports.sendGift = async (req, res) => {
   try {
-    console.log("req.query#$#$#$#$$#$#$#$#$$#$#$#$#$#$#$#$#", req.query);
+    console.log('req.query#$#$#$#$$#$#$#$#$$#$#$#$#$#$#$#$#', req.query);
     if (
       !req.query.postId ||
       !req.query.userId ||
@@ -24,7 +26,7 @@ exports.sendGift = async (req, res) => {
     ) {
       return res
         .status(200)
-        .json({ status: false, message: "Invalid Details" });
+        .json({ status: false, message: 'Invalid Details' });
     }
 
     const user = await User.findById(req.query.userId);
@@ -34,21 +36,21 @@ exports.sendGift = async (req, res) => {
     if (!user) {
       return res.status(200).json({
         status: false,
-        message: "user does not found!!",
+        message: 'user does not found!!',
       });
     }
 
     if (!post) {
       return res.status(200).json({
         status: false,
-        message: "post does not found!!",
+        message: 'post does not found!!',
       });
     }
 
     if (!gift) {
       return res.status(200).json({
         status: false,
-        message: "gift does not found!!",
+        message: 'gift does not found!!',
       });
     }
 
@@ -66,7 +68,7 @@ exports.sendGift = async (req, res) => {
     if (user.coin < req.query.coin) {
       return res.status(200).json({
         status: false,
-        message: "user does not have sufficient coin!!!",
+        message: 'user does not have sufficient coin!!!',
       });
     }
 
@@ -78,7 +80,7 @@ exports.sendGift = async (req, res) => {
     if (!receiverId) {
       return res.status(200).json({
         status: false,
-        message: "recevier user does not found!!",
+        message: 'recevier user does not found!!',
       });
     }
 
@@ -86,7 +88,7 @@ exports.sendGift = async (req, res) => {
     receiverId.diamond += parseInt(req.query.coin);
     await receiverId.save();
 
-    console.log("$$$$$$", receiverId);
+    console.log('$$$$$$', receiverId);
 
     //User Spend Coin History
     const userSpend = await new History();
@@ -97,8 +99,8 @@ exports.sendGift = async (req, res) => {
     userSpend.isIncome = false;
     userSpend.receiverId = receiverId._id;
     userSpend.giftId = gift._id;
-    userSpend.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    userSpend.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     await userSpend.save();
@@ -112,53 +114,54 @@ exports.sendGift = async (req, res) => {
     userEarn.isIncome = true;
     userEarn.userId = user._id;
     userEarn.giftId = gift._id;
-    userEarn.date = new Date().toLocaleString("en-US", {
-      timeZone: "Africa/Lagos",
+    userEarn.date = new Date().toLocaleString('en-US', {
+      timeZone: 'Africa/Lagos',
     });
 
     await userEarn.save();
 
-    console.log("%%%%%%%%%%%%% userSpend %%%%%%%%%%%%%%%%%", userSpend);
-    console.log("%%%%%%%%%%%%%% userEarn %%%%%%%%%%%%%%%%", userEarn);
+    console.log('%%%%%%%%%%%%% userSpend %%%%%%%%%%%%%%%%%', userSpend);
+    console.log('%%%%%%%%%%%%%% userEarn %%%%%%%%%%%%%%%%', userEarn);
 
-    const payload = {
-      to: receiverId.fcm_token,
+    const message = {
+      token: receiverId.fcm_token, // single token
       notification: {
-        body: post.description,
         title: user.name,
-        image: user ? user.profileImage : "",
+        body: post.description,
+        imageUrl: user?.profileImage || '',
       },
       data: {
-        data: {},
-        type: "ADMIN",
+        type: 'ADMIN',
+        data: JSON.stringify({}), // data must be stringified
       },
     };
 
-    await fcm.send(payload, function (err, response) {
-      if (err) {
-        console.log("Something has gone wrong!", err);
-      } else {
-        console.log("Successfully sent with response: ", response);
-        console.log("###################################### ", response);
+    try {
+      const response = await admin.messaging().send(message);
+      console.log('Successfully sent with response:', response);
+      console.log('######################################', response);
 
-        const notification = new Notification();
-        notification.receiverId = receiverId._id;
-        notification.type = 2;
-        notification.userId = user._id;
-        notification.giftImage = gift.image;
-        notification.save();
-      }
-    });
+      const notification = new Notification({
+        receiverId: receiverId._id,
+        type: 2,
+        userId: user._id,
+        giftImage: gift.image,
+      });
+
+      await notification.save();
+    } catch (err) {
+      console.error('Something has gone wrong!', err);
+    }
 
     return res.status(200).json({
       status: true,
-      message: "Success!!!",
+      message: 'Success!!!',
       userGift,
     });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: false, error: error.message || "Server Error" });
+      .json({ status: false, error: error.message || 'Server Error' });
   }
 };
