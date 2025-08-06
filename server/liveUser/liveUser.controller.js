@@ -160,7 +160,7 @@ exports.userIsLive = async (req, res) => {
 
     // Send notification using Firebase Admin SDK
     try {
-      const response = await admin.messaging().sendMulticast(message);
+      const response = await admin.messaging().sendEachForMulticast(message);
       console.log('Notification sent successfully:', response);
     } catch (err) {
       console.error('Error sending notification:', err);
