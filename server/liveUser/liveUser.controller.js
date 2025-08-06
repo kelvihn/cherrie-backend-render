@@ -162,6 +162,18 @@ exports.userIsLive = async (req, res) => {
     try {
       const response = await admin.messaging().sendEachForMulticast(message);
       console.log('Notification sent successfully:', response);
+
+      // Log detailed errors
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          console.error(
+            `Token ${deviceTokens[idx]} failed:`,
+            resp.error.code,
+            '-',
+            resp.error.message
+          );
+        }
+      });
     } catch (err) {
       console.error('Error sending notification:', err);
     }
