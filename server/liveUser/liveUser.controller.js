@@ -167,7 +167,7 @@ exports.userIsLive = async (req, res) => {
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
           console.error(
-            `Token ${deviceTokens[idx]} failed:`,
+            `Token ${fcmTokens[idx]} failed:`,
             resp.error.code,
             '-',
             resp.error.message
