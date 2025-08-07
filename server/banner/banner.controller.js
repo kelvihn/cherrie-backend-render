@@ -15,7 +15,10 @@ exports.store = async (req, res) => {
 
     const banner = new Banner();
 
-    const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
+    const cloudinaryUrl = await cloudinaryService.uploadByType(
+      req.file.path,
+      'banner'
+    );
 
     banner.url = req.body.url;
     banner.image = cloudinaryUrl;
@@ -24,9 +27,12 @@ exports.store = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: true, message: 'Banner Create Successfully..!', banner });
+      .json({ status: true, message: 'Banner Created Successfully!', banner });
   } catch (error) {
-    deleteFile(req.file);
+    // Clean up local file if Cloudinary upload fails
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
     console.log(error);
     return res
       .status(500)
@@ -46,29 +52,58 @@ exports.update = async (req, res) => {
     const banner = await Banner.findById(req.query.bannerId);
 
     if (!banner) {
-      deleteFile(req.file);
+      // Clean up uploaded file if banner doesn't exist
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
       return res
         .status(200)
-        .json({ status: false, message: 'banner does not exist!!' });
+        .json({ status: false, message: 'Banner does not exist!' });
     }
 
     if (req.file) {
-      if (fs.existsSync(banner.image)) {
-        fs.unlinkSync(banner.image);
+      try {
+        // Delete old image from Cloudinary if it exists
+        if (banner.image && banner.image.includes('cloudinary')) {
+          const publicId = cloudinaryService.extractPublicId(banner.image);
+          await cloudinaryService.deleteFile(publicId);
+        }
+        // If it's an old local file, delete it locally
+        else if (banner.image && !banner.image.startsWith('http')) {
+          const localPath = banner.image;
+          if (fs.existsSync(localPath)) {
+            fs.unlinkSync(localPath);
+          }
+        }
+
+        // Upload new image to Cloudinary
+        const cloudinaryUrl = await cloudinaryService.uploadByType(
+          req.file.path,
+          'banner'
+        );
+        banner.image = cloudinaryUrl;
+      } catch (uploadError) {
+        // Clean up local file if Cloudinary upload fails
+        if (req.file && fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        throw uploadError;
       }
-      const cloudinaryUrl = await cloudinaryService.uploadFile(req.file.path);
-      banner.image = cloudinaryUrl;
     }
-    banner.url = req.body.url;
+
+    banner.url = req.body.url ? req.body.url : banner.url;
 
     await banner.save();
 
     return res
       .status(200)
-      .json({ status: true, message: 'Banner Create Successfully..!', banner });
+      .json({ status: true, message: 'Banner Updated Successfully!', banner });
   } catch (error) {
     console.log(error);
-    deleteFile(req.file);
+    // Clean up local file if there was an error
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
     return res
       .status(500)
       .json({ status: false, error: error.message || 'Server Error' });
@@ -77,27 +112,50 @@ exports.update = async (req, res) => {
 
 //Delete Banner
 exports.delete = async (req, res) => {
-  if (!req.query.bannerId) {
+  try {
+    if (!req.query.bannerId) {
+      return res
+        .status(200)
+        .json({ status: false, message: 'Invalid Details!' });
+    }
+
+    const banner = await Banner.findById(req.query.bannerId);
+
+    if (!banner) {
+      return res
+        .status(200)
+        .json({ status: false, message: 'Banner does not exist!' });
+    }
+
+    // Delete image from Cloudinary if it's a Cloudinary URL
+    if (banner.image && banner.image.includes('cloudinary')) {
+      try {
+        const publicId = cloudinaryService.extractPublicId(banner.image);
+        await cloudinaryService.deleteFile(publicId);
+      } catch (deleteError) {
+        console.log('Error deleting from Cloudinary:', deleteError);
+        // Continue with banner deletion even if Cloudinary deletion fails
+      }
+    }
+    // Delete local file if it's an old local file
+    else if (banner.image && !banner.image.startsWith('http')) {
+      const localPath = banner.image;
+      if (fs.existsSync(localPath)) {
+        fs.unlinkSync(localPath);
+      }
+    }
+
+    await banner.deleteOne();
+
     return res
       .status(200)
-      .json({ status: false, message: 'Oops ! Invalid Details!!' });
-  }
-
-  const banner = await Banner.findById(req.query.bannerId);
-
-  if (!banner) {
+      .json({ status: true, message: 'Banner deleted successfully!' });
+  } catch (error) {
+    console.log(error);
     return res
-      .status(200)
-      .json({ status: false, message: 'banner does not exist!!' });
+      .status(500)
+      .json({ status: false, error: error.message || 'Server Error' });
   }
-
-  if (fs.existsSync(banner.image)) {
-    fs.unlinkSync(banner.image);
-  }
-
-  await banner.deleteOne();
-
-  return res.status(200).json({ status: true, message: 'Success!!' });
 };
 
 //Get Banner
@@ -105,12 +163,11 @@ exports.index = async (req, res) => {
   try {
     const banner = await Banner.find();
 
-    return res.status(200).json({ status: true, message: 'Success!!', banner });
+    return res.status(200).json({ status: true, message: 'Success!', banner });
   } catch (error) {
     console.log(error);
-    deleteFile(req.file);
     return res
       .status(500)
-      .json({ status: false, error: error.message || 'Server Error!!' });
+      .json({ status: false, error: error.message || 'Server Error!' });
   }
 };
