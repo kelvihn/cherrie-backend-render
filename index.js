@@ -1302,6 +1302,11 @@ io.on('connect', async (socket) => {
 });
 
 //start the server
-server.listen(config.PORT, () => {
-  console.log('Magic happens on port ' + config.PORT);
+// server.listen(config.PORT, () => {
+//   console.log('Magic happens on port ' + config.PORT);
+// });
+
+const port = process.env.PORT || 5000;
+server.listen(port, () => {
+  console.log(`serving on port ${port}`);
 });
