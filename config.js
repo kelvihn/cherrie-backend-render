@@ -2,7 +2,7 @@ module.exports = {
   MONGODB_USERNAME: 'kelvinroyomoni',
   MONGODB_PASSWORD: '12KAreokeko',
   MONGODB_DB_NAME: 'cherrie_db',
-  baseURL: 'https://cherrie-backend-render-production.up.railway.app/',
+  baseURL: 'https://cherrie-backend-render.onrender.com/',
   //port
   PORT: process.env.PORT || 5000,
 
